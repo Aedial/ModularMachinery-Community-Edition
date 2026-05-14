@@ -9,6 +9,7 @@ import appeng.me.GridAccessException;
 import appeng.util.Platform;
 import github.kasuminova.mmce.common.tile.base.MEItemBus;
 import hellfirepvp.modularmachinery.common.lib.ItemsMM;
+import hellfirepvp.modularmachinery.common.CommonProxy.GuiType;
 import hellfirepvp.modularmachinery.common.machine.IOType;
 import hellfirepvp.modularmachinery.common.machine.MachineComponent;
 import hellfirepvp.modularmachinery.common.util.IOInventory;
@@ -61,19 +62,17 @@ public class MEItemOutputBus extends MEItemBus implements SettingsTransfer {
     @Nonnull
     @Override
     public TickingRequest getTickingRequest(@Nonnull final IGridNode node) {
-        return new TickingRequest(5, 60, !hasItem(), true);
+        return this.getPollingTickingRequest();
     }
 
     @Nonnull
     @Override
     public TickRateModulation tickingRequest(@Nonnull final IGridNode node, final int ticksSinceLastCall) {
-        if (!proxy.isActive()) {
-            return TickRateModulation.IDLE;
-        }
+        if (!proxy.isActive()) return this.getInactiveTickRateModulation();
 
         int[] needUpdateSlots = getNeedUpdateSlots();
         if (needUpdateSlots.length == 0) {
-            return TickRateModulation.SLOWER;
+            return this.getNoWorkTickRateModulation(ticksSinceLastCall);
         }
 
         inTick = true;
@@ -118,7 +117,7 @@ public class MEItemOutputBus extends MEItemBus implements SettingsTransfer {
 
             inTick = false;
             rwLock.writeLock().unlock();
-            return successAtLeastOnce ? TickRateModulation.FASTER : TickRateModulation.SLOWER;
+            return this.getWorkTickRateModulation(successAtLeastOnce, ticksSinceLastCall);
         } catch (GridAccessException e) {
             inTick = false;
             changedSlots = new boolean[changedSlots.length];
@@ -127,17 +126,15 @@ public class MEItemOutputBus extends MEItemBus implements SettingsTransfer {
         }
     }
 
+    @Nonnull
     @Override
-    public void markNoUpdate() {
-        if (hasChangedSlots()) {
-            try {
-                proxy.getTick().alertDevice(proxy.getNode());
-            } catch (GridAccessException e) {
-                // NO-OP
-            }
-        }
+    public GuiType getMainGuiType() {
+        return GuiType.ME_ITEM_OUTPUT_BUS;
+    }
 
-        super.markNoUpdate();
+    @Override
+    protected boolean hasWorkToDo() {
+        return this.hasItem();
     }
 
     public int getConfiguredStackSize() {
@@ -182,6 +179,7 @@ public class MEItemOutputBus extends MEItemBus implements SettingsTransfer {
     public NBTTagCompound downloadSettings() {
         NBTTagCompound tag = new NBTTagCompound();
         tag.setInteger("configuredStackSize", this.configuredStackSize);
+        this.writePollingSettings(tag);
         return tag;
     }
 
@@ -189,12 +187,8 @@ public class MEItemOutputBus extends MEItemBus implements SettingsTransfer {
     public void uploadSettings(NBTTagCompound settings) {
         if (settings.hasKey("configuredStackSize")) {
             setConfiguredStackSize(settings.getInteger("configuredStackSize"));
-
-            try {
-                proxy.getTick().alertDevice(proxy.getNode());
-            } catch (GridAccessException e) {
-                // NO-OP
-            }
         }
+
+        this.readPollingSettings(settings);
     }
 }

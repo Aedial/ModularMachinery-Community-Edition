@@ -32,7 +32,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.stream.IntStream;
 
-public abstract class MEGasBus extends MEMachineComponent implements
+public abstract class MEGasBus extends MEPollingMachineComponent implements
     IGasInventoryHost,
     IUpgradeableHost,
     IConfigManagerHost,

@@ -11,15 +11,18 @@ import appeng.helpers.InventoryAction;
 import appeng.util.item.AEItemStack;
 import github.kasuminova.mmce.common.container.ContainerMEItemInputBus;
 import github.kasuminova.mmce.common.network.PktMEInputBusInvAction;
+import github.kasuminova.mmce.common.network.PktOpenMEBusGui;
 import github.kasuminova.mmce.common.tile.MEItemInputBus;
 import hellfirepvp.modularmachinery.ModularMachinery;
 import hellfirepvp.modularmachinery.client.ClientProxy;
+import hellfirepvp.modularmachinery.common.CommonProxy.GuiType;
 import hellfirepvp.modularmachinery.common.util.MiscUtils;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import mezz.jei.api.gui.IGhostIngredientHandler;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
@@ -43,10 +46,33 @@ public class GuiMEItemInputBus extends GuiMEItemBus implements IJEIGhostIngredie
     private static final ResourceLocation TEXTURES_INPUT_BUS = new ResourceLocation(ModularMachinery.MODID, "textures/gui/meiteminputbus.png");
 
     protected final Map<IGhostIngredientHandler.Target<?>, Object> mapTargetSlot = new Object2ObjectOpenHashMap<>();
+    private final MEItemInputBus bus;
+    private GuiMEBusPollingButton pollingRateBtn;
 
     public GuiMEItemInputBus(final MEItemInputBus te, final EntityPlayer player) {
         super(new ContainerMEItemInputBus(te, player));
+        this.bus = te;
         this.ySize = 204;
+    }
+
+    @Override
+    public void initGui() {
+        super.initGui();
+
+        this.pollingRateBtn = new GuiMEBusPollingButton(
+            this.guiLeft - 18, this.guiTop + 8, this.bus::getPollingRate);
+        this.buttonList.add(this.pollingRateBtn);
+    }
+
+    @Override
+    protected void actionPerformed(@Nonnull final GuiButton btn) throws IOException {
+        super.actionPerformed(btn);
+
+        if (btn == this.pollingRateBtn) {
+            ModularMachinery.NET_CHANNEL.sendToServer(
+                new PktOpenMEBusGui(this.bus.getPos(), GuiType.ME_BUS_POLLING)
+            );
+        }
     }
 
     private static List<String> getAddActionInfo() {

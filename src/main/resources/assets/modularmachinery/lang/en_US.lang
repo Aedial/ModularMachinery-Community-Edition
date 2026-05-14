@@ -77,6 +77,10 @@ gui.meitembus.item_cached=Items Cached: %s
 gui.meitembus.nbt_stored=Items have been stored internally.
 gui.meitembus.stack_size.name=Max Stack Size
 gui.meitembus.stack_size.config=Configure Max Stack Size
+gui.mehatch.polling_rate.name=Polling Rate
+gui.mehatch.polling_rate.current=Current: §bevery %s
+gui.mehatch.polling_rate.current_adaptive=Current: §bevery %s-%s ticks§r (Adaptive)
+gui.mehatch.polling_rate.tooltip=Controls how often the ME bus checks the ME Network for work (0 = Adaptive).
 
 gui.mefluidoutputbus.title=ME Machinery Fluid Output Bus
 gui.mefluidinputbus.title=ME Machinery Fluid Input Bus

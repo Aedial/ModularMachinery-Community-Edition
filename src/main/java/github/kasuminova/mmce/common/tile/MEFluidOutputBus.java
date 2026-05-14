@@ -8,17 +8,19 @@ import appeng.api.storage.data.IAEFluidStack;
 import appeng.me.GridAccessException;
 import appeng.util.Platform;
 import github.kasuminova.mmce.common.tile.base.MEFluidBus;
+import hellfirepvp.modularmachinery.common.CommonProxy.GuiType;
 import hellfirepvp.modularmachinery.common.lib.ItemsMM;
 import hellfirepvp.modularmachinery.common.machine.IOType;
 import hellfirepvp.modularmachinery.common.machine.MachineComponent;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.concurrent.locks.ReadWriteLock;
 
-public class MEFluidOutputBus extends MEFluidBus {
+public class MEFluidOutputBus extends MEFluidBus implements SettingsTransfer {
 
     public MEFluidOutputBus() {
         this.tanks.setOneFluidOneSlot(true);
@@ -43,18 +45,18 @@ public class MEFluidOutputBus extends MEFluidBus {
     @Nonnull
     @Override
     public TickingRequest getTickingRequest(@Nonnull final IGridNode node) {
-        return new TickingRequest(5, 60, !hasFluid(), true);
+        return this.getPollingTickingRequest();
     }
 
     @Nonnull
     @Override
     public TickRateModulation tickingRequest(@Nonnull final IGridNode node, final int ticksSinceLastCall) {
         if (!proxy.isActive()) {
-            return TickRateModulation.IDLE;
+            return this.getInactiveTickRateModulation();
         }
         int[] needUpdateSlots = getNeedUpdateSlots();
         if (needUpdateSlots.length == 0) {
-            return TickRateModulation.SLOWER;
+            return this.getNoWorkTickRateModulation(ticksSinceLastCall);
         }
 
         ReadWriteLock rwLock = tanks.getRWLock();
@@ -88,13 +90,24 @@ public class MEFluidOutputBus extends MEFluidBus {
 
             inTick = false;
             rwLock.writeLock().unlock();
-            return successAtLeastOnce ? TickRateModulation.FASTER : TickRateModulation.SLOWER;
+            return this.getWorkTickRateModulation(successAtLeastOnce, ticksSinceLastCall);
         } catch (GridAccessException e) {
             inTick = false;
             changedSlots = new boolean[TANK_SLOT_AMOUNT];
             rwLock.writeLock().unlock();
             return TickRateModulation.IDLE;
         }
+    }
+
+    @Nonnull
+    @Override
+    public GuiType getMainGuiType() {
+        return GuiType.ME_FLUID_OUTPUT_BUS;
+    }
+
+    @Override
+    protected boolean hasWorkToDo() {
+        return this.hasFluid();
     }
 
     public boolean hasFluid() {
@@ -108,16 +121,15 @@ public class MEFluidOutputBus extends MEFluidBus {
     }
 
     @Override
-    public void markNoUpdate() {
-        if (hasFluid()) {
-            try {
-                proxy.getTick().alertDevice(proxy.getNode());
-            } catch (GridAccessException e) {
-                // NO-OP
-            }
-        }
+    public NBTTagCompound downloadSettings() {
+        NBTTagCompound tag = new NBTTagCompound();
+        this.writePollingSettings(tag);
+        return tag;
+    }
 
-        super.markNoUpdate();
+    @Override
+    public void uploadSettings(NBTTagCompound settings) {
+        this.readPollingSettings(settings);
     }
 
 

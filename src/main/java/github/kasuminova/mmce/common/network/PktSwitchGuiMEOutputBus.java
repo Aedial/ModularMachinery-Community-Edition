@@ -46,8 +46,6 @@ public class PktSwitchGuiMEOutputBus implements IMessage, IMessageHandler<PktSwi
                 return;
             }
 
-            player.closeScreen();
-
             if (message.guiType == 0) {
                 player.openGui(
                         ModularMachinery.MODID,

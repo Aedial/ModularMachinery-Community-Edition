@@ -11,7 +11,7 @@ import com.mekeng.github.common.me.data.impl.AEGasStack;
 import com.mekeng.github.common.me.inventory.impl.GasInventory;
 import github.kasuminova.mmce.common.tile.base.MEGasBus;
 import github.kasuminova.mmce.common.util.IExtendedGasHandler;
-import hellfirepvp.modularmachinery.ModularMachinery;
+import hellfirepvp.modularmachinery.common.CommonProxy.GuiType;
 import hellfirepvp.modularmachinery.common.crafting.ComponentType;
 import hellfirepvp.modularmachinery.common.lib.ComponentTypesMM;
 import hellfirepvp.modularmachinery.common.lib.ItemsMM;
@@ -56,40 +56,21 @@ public class MEGasInputBus extends MEGasBus implements SettingsTransfer {
     @Nonnull
     @Override
     public TickingRequest getTickingRequest(@Nonnull final IGridNode node) {
-        return new TickingRequest(10, 120, !needsUpdate(), true);
-    }
-
-    private boolean needsUpdate() {
-        int capacity = tanks.getTanks()[0].getMaxGas();
-
-        for (int slot = 0; slot < config.size(); slot++) {
-            GasStack cfgStack = config.getGasStack(slot);
-            GasStack invStack = tanks.getGasStack(slot);
-
-            if (cfgStack == null) {
-                if (invStack != null) {
-                    return true;
-                }
-                continue;
-            }
-
-            if (invStack == null) {
-                return true;
-            }
-
-            if (!cfgStack.isGasEqual(invStack) || invStack.amount != capacity) {
-                return true;
-            }
-        }
-        return false;
+        return this.getPollingTickingRequest();
     }
 
     @Nonnull
     @Override
     public TickRateModulation tickingRequest(@Nonnull final IGridNode node, final int ticksSinceLastCall) {
         if (!proxy.isActive()) {
-            return TickRateModulation.IDLE;
+            return this.getInactiveTickRateModulation();
         }
+
+        int[] needUpdateSlots = getNeedUpdateSlots();
+        if (needUpdateSlots.length == 0) {
+            return this.getNoWorkTickRateModulation(ticksSinceLastCall);
+        }
+
         inTick = true;
         try {
             boolean successAtLeastOnce = false;
@@ -98,7 +79,7 @@ public class MEGasInputBus extends MEGasBus implements SettingsTransfer {
             int capacity = tanks.getTanks()[0].getMaxGas();
 
             synchronized (tanks) {
-                for (final int slot : getNeedUpdateSlots()) {
+                for (final int slot : needUpdateSlots) {
                     changedSlots[slot] = false;
                     GasStack cfgStack = config.getGasStack(slot);
                     GasStack invStack = tanks.getGasStack(slot);
@@ -166,12 +147,39 @@ public class MEGasInputBus extends MEGasBus implements SettingsTransfer {
                 }
             }
             inTick = false;
-            return successAtLeastOnce ? TickRateModulation.FASTER : TickRateModulation.SLOWER;
+            return this.getWorkTickRateModulation(successAtLeastOnce, ticksSinceLastCall);
         } catch (GridAccessException e) {
             inTick = false;
             changedSlots = new boolean[TANK_SLOT_AMOUNT];
             return TickRateModulation.IDLE;
         }
+    }
+
+    @Override
+    protected boolean hasWorkToDo() {
+        int capacity = tanks.getTanks()[0].getMaxGas();
+
+        for (int slot = 0; slot < config.size(); slot++) {
+            GasStack cfgStack = config.getGasStack(slot);
+            GasStack invStack = tanks.getGasStack(slot);
+
+            if (cfgStack == null) {
+                if (invStack != null) {
+                    return true;
+                }
+                continue;
+            }
+
+            if (invStack == null) {
+                return true;
+            }
+
+            if (!cfgStack.isGasEqual(invStack) || invStack.amount != capacity) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private IAEGasStack extractStackFromAE(final IMEMonitor<IAEGasStack> inv, final GasStack stack) throws GridAccessException {
@@ -185,6 +193,12 @@ public class MEGasInputBus extends MEGasBus implements SettingsTransfer {
     @Override
     public boolean canGroupInput() {
         return true;
+    }
+
+    @Nonnull
+    @Override
+    public GuiType getMainGuiType() {
+        return GuiType.ME_GAS_INPUT_BUS;
     }
 
     @Nullable
@@ -209,32 +223,17 @@ public class MEGasInputBus extends MEGasBus implements SettingsTransfer {
     }
 
     @Override
-    public void markNoUpdate() {
-        if (needsUpdate()) {
-            try {
-                proxy.getTick().alertDevice(proxy.getNode());
-            } catch (GridAccessException e) {
-                // NO-OP
-            }
-        }
-
-        super.markNoUpdate();
-    }
-
-    @Override
     public NBTTagCompound downloadSettings() {
         NBTTagCompound tag = new NBTTagCompound();
         tag.setTag(CONFIG_TAG_KEY, config.save());
+        this.writePollingSettings(tag);
         return tag;
     }
 
     @Override
     public void uploadSettings(NBTTagCompound settings) {
         config.load(settings.getCompoundTag(CONFIG_TAG_KEY));
-        try {
-            proxy.getTick().alertDevice(proxy.getNode());
-        } catch (GridAccessException e) {
-            ModularMachinery.log.warn("Error while uploading settings", e);
-        }
+        this.readPollingSettings(settings);
+        this.markForUpdate();
     }
 }

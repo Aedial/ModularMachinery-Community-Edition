@@ -12,9 +12,12 @@ import com.mekeng.github.common.me.inventory.IGasInventory;
 import com.mekeng.github.network.packet.CGasSlotSync;
 import com.mekeng.github.util.Utils;
 import github.kasuminova.mmce.common.container.ContainerMEGasInputBus;
+import github.kasuminova.mmce.common.network.PktOpenMEBusGui;
 import github.kasuminova.mmce.common.tile.MEGasInputBus;
 import github.kasuminova.mmce.common.tile.base.MEFluidBus;
 import hellfirepvp.modularmachinery.ModularMachinery;
+import hellfirepvp.modularmachinery.common.CommonProxy.GuiType;
+import net.minecraft.client.gui.GuiButton;
 import mekanism.api.gas.GasStack;
 import mezz.jei.api.gui.IGhostIngredientHandler;
 import net.minecraft.client.resources.I18n;
@@ -24,6 +27,7 @@ import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.Nonnull;
 import java.awt.Rectangle;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -32,6 +36,7 @@ public class GuiMEGasInputBus extends GuiUpgradeable implements IJEIGhostIngredi
     private static final ResourceLocation TEXTURES_INPUT_BUS = new ResourceLocation(ModularMachinery.MODID, "textures/gui/mefluidinputbus.png");
 
     private final MEGasInputBus bus;
+    private GuiMEBusPollingButton pollingRateBtn;
 
     public GuiMEGasInputBus(final MEGasInputBus te, final EntityPlayer player) {
         super(new ContainerMEGasInputBus(te, player));
@@ -54,6 +59,20 @@ public class GuiMEGasInputBus extends GuiUpgradeable implements IJEIGhostIngredi
 
     @Override
     protected void addButtons() {
+        this.pollingRateBtn = new GuiMEBusPollingButton(
+            this.guiLeft - 18, this.guiTop + 8, this.bus::getPollingRate);
+        this.buttonList.add(this.pollingRateBtn);
+    }
+
+    @Override
+    protected void actionPerformed(final GuiButton btn) throws IOException {
+        super.actionPerformed(btn);
+
+        if (btn == this.pollingRateBtn) {
+            ModularMachinery.NET_CHANNEL.sendToServer(
+                new PktOpenMEBusGui(this.bus.getPos(), GuiType.ME_BUS_POLLING)
+            );
+        }
     }
 
     @Override

@@ -19,6 +19,7 @@ import github.kasuminova.mmce.common.tile.MEGasOutputBus;
 import github.kasuminova.mmce.common.tile.MEItemInputBus;
 import github.kasuminova.mmce.common.tile.MEItemOutputBus;
 import github.kasuminova.mmce.common.tile.MEPatternProvider;
+import github.kasuminova.mmce.common.tile.base.MEPollingMachineComponent;
 import hellfirepvp.modularmachinery.ModularMachinery;
 import hellfirepvp.modularmachinery.client.gui.GuiContainerEnergyHatch;
 import hellfirepvp.modularmachinery.client.gui.GuiContainerFluidHatch;
@@ -346,6 +347,12 @@ public class ClientProxy extends CommonProxy {
                     return null;
                 }
                 return new GuiMEGasInputBus((MEGasInputBus) present, player);
+            }
+            case ME_BUS_POLLING -> {
+                if (!Mods.AE2.isPresent()) {
+                    return null;
+                }
+                return new GuiMEBusPollingRate(player.inventory, (MEPollingMachineComponent) present);
             }
             case ME_PATTERN_PROVIDER -> {
                 if (!Mods.AE2.isPresent()) {

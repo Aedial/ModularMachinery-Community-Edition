@@ -18,6 +18,7 @@ import github.kasuminova.mmce.common.container.ContainerMEGasOutputBus;
 import github.kasuminova.mmce.common.container.ContainerMEItemInputBus;
 import github.kasuminova.mmce.common.container.ContainerMEItemOutputBus;
 import github.kasuminova.mmce.common.container.ContainerMEItemOutputBusStackSize;
+import github.kasuminova.mmce.common.container.ContainerMEBusPollingRate;
 import github.kasuminova.mmce.common.container.ContainerMEPatternProvider;
 import github.kasuminova.mmce.common.handler.EventHandler;
 import github.kasuminova.mmce.common.handler.UpgradeEventHandler;
@@ -30,6 +31,7 @@ import github.kasuminova.mmce.common.tile.MEGasOutputBus;
 import github.kasuminova.mmce.common.tile.MEItemInputBus;
 import github.kasuminova.mmce.common.tile.MEItemOutputBus;
 import github.kasuminova.mmce.common.tile.MEPatternProvider;
+import github.kasuminova.mmce.common.tile.base.MEPollingMachineComponent;
 import github.kasuminova.mmce.common.util.concurrent.Action;
 import github.kasuminova.mmce.common.world.MMWorldEventListener;
 import hellfirepvp.modularmachinery.ModularMachinery;
@@ -313,6 +315,12 @@ public class CommonProxy implements IGuiHandler {
                 }
                 return new ContainerMEItemOutputBusStackSize(player.inventory, (MEItemOutputBus) present);
             }
+            case ME_BUS_POLLING -> {
+                if (aeSecurityCheck(player, present)) return null;
+                if (present instanceof MEPollingMachineComponent host) {
+                    return new ContainerMEBusPollingRate(player.inventory, host);
+                }
+            }
             case GUI_GROUP_INPUT_CONFIG -> {
                 if (present instanceof MachineGroupInput m && m.canGroupInput()) {
                     return new ContainerGroupInputConfig(present, player);
@@ -347,6 +355,7 @@ public class CommonProxy implements IGuiHandler {
         ME_FLUID_INPUT_BUS(Mods.AE2.isPresent() ? MEFluidInputBus.class : null),
         ME_GAS_OUTPUT_BUS(Mods.AE2EL.isPresent() && Mods.MEKENG.isPresent() ? MEGasOutputBus.class : null),
         ME_GAS_INPUT_BUS(Mods.AE2EL.isPresent() && Mods.MEKENG.isPresent() ? MEGasInputBus.class : null),
+        ME_BUS_POLLING(Mods.AE2.isPresent() ? MEPollingMachineComponent.class : null),
         ME_PATTERN_PROVIDER(Mods.AE2.isPresent() ? MEPatternProvider.class : null),
         GUI_ESSENCE_PROVIDER(Mods.BM2.isPresent() ? TileLifeEssenceProvider.class : null),
         GUI_GROUP_INPUT_CONFIG(TileEntity.class)

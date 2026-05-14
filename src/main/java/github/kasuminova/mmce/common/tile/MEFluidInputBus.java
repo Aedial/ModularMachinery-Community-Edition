@@ -10,7 +10,7 @@ import appeng.fluids.util.IAEFluidTank;
 import appeng.me.GridAccessException;
 import appeng.util.Platform;
 import github.kasuminova.mmce.common.tile.base.MEFluidBus;
-import hellfirepvp.modularmachinery.ModularMachinery;
+import hellfirepvp.modularmachinery.common.CommonProxy.GuiType;
 import hellfirepvp.modularmachinery.common.lib.ItemsMM;
 import hellfirepvp.modularmachinery.common.machine.IOType;
 import hellfirepvp.modularmachinery.common.machine.MachineComponent;
@@ -52,44 +52,17 @@ public class MEFluidInputBus extends MEFluidBus implements SettingsTransfer {
     @Nonnull
     @Override
     public TickingRequest getTickingRequest(@Nonnull final IGridNode node) {
-        return new TickingRequest(10, 120, !needsUpdate(), true);
-    }
-
-    private boolean needsUpdate() {
-        int capacity = tanks.getCapacity();
-
-        for (int slot = 0; slot < config.getSlots(); slot++) {
-            IAEFluidStack cfgStack = config.getFluidInSlot(slot);
-            IAEFluidStack invStack = tanks.getFluidInSlot(slot);
-
-            if (cfgStack == null) {
-                if (invStack != null) {
-                    return true;
-                }
-                continue;
-            }
-
-            if (invStack == null) {
-                return true;
-            }
-
-            if (!cfgStack.equals(invStack) || invStack.getStackSize() != capacity) {
-                return true;
-            }
-        }
-        return false;
+        return this.getPollingTickingRequest();
     }
 
     @Nonnull
     @Override
     public TickRateModulation tickingRequest(@Nonnull final IGridNode node, final int ticksSinceLastCall) {
-        if (!proxy.isActive()) {
-            return TickRateModulation.IDLE;
-        }
+        if (!proxy.isActive()) return this.getInactiveTickRateModulation();
 
         int[] needUpdateSlots = getNeedUpdateSlots();
         if (needUpdateSlots.length == 0) {
-            return TickRateModulation.SLOWER;
+            return this.getNoWorkTickRateModulation(ticksSinceLastCall);
         }
 
         ReadWriteLock rwLock = tanks.getRWLock();
@@ -162,13 +135,36 @@ public class MEFluidInputBus extends MEFluidBus implements SettingsTransfer {
 
             inTick = false;
             rwLock.writeLock().unlock();
-            return successAtLeastOnce ? TickRateModulation.FASTER : TickRateModulation.SLOWER;
+            return this.getWorkTickRateModulation(successAtLeastOnce, ticksSinceLastCall);
         } catch (GridAccessException e) {
             inTick = false;
             changedSlots = new boolean[TANK_SLOT_AMOUNT];
             rwLock.writeLock().unlock();
             return TickRateModulation.IDLE;
         }
+    }
+
+    @Override
+    protected boolean hasWorkToDo() {
+        int capacity = tanks.getCapacity();
+
+        for (int slot = 0; slot < config.getSlots(); slot++) {
+            IAEFluidStack cfgStack = config.getFluidInSlot(slot);
+            IAEFluidStack invStack = tanks.getFluidInSlot(slot);
+
+            if (cfgStack == null) {
+                if (invStack != null) return true;
+                continue;
+            }
+
+            if (invStack == null) return true;
+
+            if (!cfgStack.equals(invStack) || invStack.getStackSize() != capacity) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private IAEFluidStack extractStackFromAE(final IMEMonitor<IAEFluidStack> inv, final IAEFluidStack stack) throws GridAccessException {
@@ -200,34 +196,24 @@ public class MEFluidInputBus extends MEFluidBus implements SettingsTransfer {
         return true;
     }
 
+    @Nonnull
     @Override
-    public void markNoUpdate() {
-        if (needsUpdate()) {
-            try {
-                proxy.getTick().alertDevice(proxy.getNode());
-            } catch (GridAccessException e) {
-                // NO-OP
-            }
-        }
-
-        super.markNoUpdate();
+    public GuiType getMainGuiType() {
+        return GuiType.ME_FLUID_INPUT_BUS;
     }
 
     @Override
     public NBTTagCompound downloadSettings() {
         NBTTagCompound tag = new NBTTagCompound();
         config.writeToNBT(tag, CONFIG_TAG_KEY);
+        this.writePollingSettings(tag);
         return tag;
     }
 
     @Override
     public void uploadSettings(NBTTagCompound settings) {
         config.readFromNBT(settings, CONFIG_TAG_KEY);
+        this.readPollingSettings(settings);
         this.markForUpdate();
-        try {
-            proxy.getTick().alertDevice(proxy.getNode());
-        } catch (GridAccessException e) {
-            ModularMachinery.log.warn("Error while uploading settings", e);
-        }
     }
 }

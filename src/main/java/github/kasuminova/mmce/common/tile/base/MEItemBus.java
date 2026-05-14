@@ -17,7 +17,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.stream.IntStream;
 
-public abstract class MEItemBus extends MEMachineComponent implements IGridTickable {
+public abstract class MEItemBus extends MEPollingMachineComponent implements IGridTickable {
 
     protected final IItemStorageChannel channel = AEApi.instance().storage().getStorageChannel(IItemStorageChannel.class);
 

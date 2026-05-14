@@ -7,21 +7,26 @@ import appeng.fluids.client.gui.widgets.GuiFluidSlot;
 import appeng.fluids.client.gui.widgets.GuiFluidTank;
 import appeng.fluids.util.IAEFluidTank;
 import github.kasuminova.mmce.common.container.ContainerMEFluidInputBus;
+import github.kasuminova.mmce.common.network.PktOpenMEBusGui;
 import github.kasuminova.mmce.common.tile.MEFluidInputBus;
 import github.kasuminova.mmce.common.tile.base.MEFluidBus;
 import hellfirepvp.modularmachinery.ModularMachinery;
+import hellfirepvp.modularmachinery.common.CommonProxy.GuiType;
 import hellfirepvp.modularmachinery.common.base.Mods;
+import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 import java.util.List;
+import java.io.IOException;
 
 public class GuiMEFluidInputBus extends GuiUpgradeable {
     private static final ResourceLocation TEXTURES_INPUT_BUS = new ResourceLocation(ModularMachinery.MODID, "textures/gui/mefluidinputbus.png");
 
     private final MEFluidInputBus bus;
+    private GuiMEBusPollingButton pollingRateBtn;
 
     public GuiMEFluidInputBus(final MEFluidInputBus te, final EntityPlayer player) {
         super(new ContainerMEFluidInputBus(te, player));
@@ -60,6 +65,20 @@ public class GuiMEFluidInputBus extends GuiUpgradeable {
 
     @Override
     protected void addButtons() {
+        this.pollingRateBtn = new GuiMEBusPollingButton(
+            this.guiLeft - 18, this.guiTop + 8, this.bus::getPollingRate);
+        this.buttonList.add(this.pollingRateBtn);
+    }
+
+    @Override
+    protected void actionPerformed(final GuiButton btn) throws IOException {
+        super.actionPerformed(btn);
+
+        if (btn == this.pollingRateBtn) {
+            ModularMachinery.NET_CHANNEL.sendToServer(
+                new PktOpenMEBusGui(this.bus.getPos(), GuiType.ME_BUS_POLLING)
+            );
+        }
     }
 
     @Override

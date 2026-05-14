@@ -10,6 +10,7 @@ import com.mekeng.github.common.me.data.IAEGasStack;
 import com.mekeng.github.common.me.data.impl.AEGasStack;
 import github.kasuminova.mmce.common.tile.base.MEGasBus;
 import github.kasuminova.mmce.common.util.IExtendedGasHandler;
+import hellfirepvp.modularmachinery.common.CommonProxy.GuiType;
 import hellfirepvp.modularmachinery.common.crafting.ComponentType;
 import hellfirepvp.modularmachinery.common.lib.ComponentTypesMM;
 import hellfirepvp.modularmachinery.common.lib.ItemsMM;
@@ -17,12 +18,13 @@ import hellfirepvp.modularmachinery.common.machine.IOType;
 import hellfirepvp.modularmachinery.common.machine.MachineComponent;
 import mekanism.api.gas.GasStack;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Objects;
 
-public class MEGasOutputBus extends MEGasBus {
+public class MEGasOutputBus extends MEGasBus implements SettingsTransfer {
 
     public MEGasOutputBus() {
     }
@@ -51,14 +53,19 @@ public class MEGasOutputBus extends MEGasBus {
     @Nonnull
     @Override
     public TickingRequest getTickingRequest(@Nonnull final IGridNode node) {
-        return new TickingRequest(5, 60, !hasGas(), true);
+        return this.getPollingTickingRequest();
     }
 
     @Nonnull
     @Override
     public TickRateModulation tickingRequest(@Nonnull final IGridNode node, final int ticksSinceLastCall) {
         if (!proxy.isActive()) {
-            return TickRateModulation.IDLE;
+            return this.getInactiveTickRateModulation();
+        }
+
+        int[] needUpdateSlots = getNeedUpdateSlots();
+        if (needUpdateSlots.length == 0) {
+            return this.getNoWorkTickRateModulation(ticksSinceLastCall);
         }
 
         inTick = true;
@@ -67,7 +74,7 @@ public class MEGasOutputBus extends MEGasBus {
         try {
             IMEMonitor<IAEGasStack> inv = proxy.getStorage().getInventory(channel);
             synchronized (tanks) {
-                for (final int slot : getNeedUpdateSlots()) {
+                for (final int slot : needUpdateSlots) {
                     changedSlots[slot] = false;
                     GasStack gas = tanks.getGasStack(slot);
 
@@ -95,30 +102,35 @@ public class MEGasOutputBus extends MEGasBus {
         }
 
         inTick = false;
-        return successAtLeastOnce ? TickRateModulation.FASTER : TickRateModulation.SLOWER;
+        return this.getWorkTickRateModulation(successAtLeastOnce, ticksSinceLastCall);
     }
 
-    public boolean hasGas() {
+    @Nonnull
+    @Override
+    public GuiType getMainGuiType() {
+        return GuiType.ME_GAS_OUTPUT_BUS;
+    }
+
+    @Override
+    protected boolean hasWorkToDo() {
         for (int i = 0; i < tanks.size(); i++) {
             GasStack stack = tanks.getGasStack(i);
-            if (stack != null) {
-                return true;
-            }
+            if (stack != null) return true;
         }
+
         return false;
     }
 
     @Override
-    public void markNoUpdate() {
-        if (hasGas()) {
-            try {
-                proxy.getTick().alertDevice(proxy.getNode());
-            } catch (GridAccessException e) {
-                // NO-OP
-            }
-        }
+    public NBTTagCompound downloadSettings() {
+        NBTTagCompound tag = new NBTTagCompound();
+        this.writePollingSettings(tag);
+        return tag;
+    }
 
-        super.markNoUpdate();
+    @Override
+    public void uploadSettings(NBTTagCompound settings) {
+        this.readPollingSettings(settings);
     }
 
 }

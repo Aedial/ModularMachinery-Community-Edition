@@ -38,12 +38,15 @@ public class Config {
     public static boolean machineParallelizeEnabledByDefault = true;
     public static boolean recipeParallelizeEnabledByDefault  = true;
     public static boolean enableFluxNetworksIntegration      = true;
+    public static boolean meHatchAdaptivePollingWaitForSleep = true;
     public static boolean enableFactoryControllerByDefault   = false;
     public static boolean controllerOutputComparatorSignal   = true;
     public static boolean asyncControllerModelRender         = true;
     public static boolean enableDurationMultiplier           = true;
     public static int     machineColor;
     public static int     maxMachineParallelism              = 2048;
+    public static int     meHatchAdaptivePollingMin          = 5;
+    public static int     meHatchAdaptivePollingMax          = 60;
     public static int     defaultFactoryMaxThread            = 20;
 
     private static File          lastReadFile;
@@ -107,6 +110,23 @@ public class Config {
         // FluxNetworks Integration
         enableFluxNetworksIntegration = lastReadConfig.getBoolean("enable-fluxnetworks-integration", "general", true,
             "When enabled, allows you to use the flux network to transfer larger amounts of energy than 2147483647.");
+        meHatchAdaptivePollingWaitForSleep = lastReadConfig.getBoolean(
+            "me-hatch-adaptive-polling-wait-for-sleep", "general",
+            true,
+            "When enabled, Adaptive polling waits until the configured max interval before sleeping. Disable to emulate the previous immediate sleep and wake behavior for polling rate 0."
+        );
+
+        // Adaptive Polling
+        meHatchAdaptivePollingMin = lastReadConfig.getInt(
+            "me-hatch-adaptive-polling-min", "general",
+            5, 1, Integer.MAX_VALUE,
+            "The fastest adaptive poll interval, in ticks, used by ME input and output hatches when in Adaptive mode."
+        );
+        meHatchAdaptivePollingMax = lastReadConfig.getInt(
+            "me-hatch-adaptive-polling-max", "general",
+            60, meHatchAdaptivePollingMin, Integer.MAX_VALUE,
+            "The slowest adaptive poll interval, in ticks, used by ME input and output hatches when in Adaptive mode."
+        );
 
         // Parallelize Feature
         machineParallelizeEnabledByDefault = lastReadConfig.getBoolean("machine-parallelize-enabled-bydefault",

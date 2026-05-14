@@ -32,7 +32,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.stream.IntStream;
 
-public abstract class MEFluidBus extends MEMachineComponent implements
+public abstract class MEFluidBus extends MEPollingMachineComponent implements
     IAEFluidInventory,
     IUpgradeableHost,
     IConfigManagerHost,

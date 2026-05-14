@@ -8,7 +8,7 @@ import appeng.api.storage.data.IAEItemStack;
 import appeng.me.GridAccessException;
 import appeng.util.Platform;
 import github.kasuminova.mmce.common.tile.base.MEItemBus;
-import hellfirepvp.modularmachinery.ModularMachinery;
+import hellfirepvp.modularmachinery.common.CommonProxy.GuiType;
 import hellfirepvp.modularmachinery.common.lib.ItemsMM;
 import hellfirepvp.modularmachinery.common.machine.IOType;
 import hellfirepvp.modularmachinery.common.machine.MachineComponent;
@@ -115,42 +115,19 @@ public class MEItemInputBus extends MEItemBus implements SettingsTransfer {
     @Nonnull
     @Override
     public TickingRequest getTickingRequest(@Nonnull final IGridNode node) {
-        return new TickingRequest(10, 120, !needsUpdate(), true);
-    }
-
-    private boolean needsUpdate() {
-        for (int slot = 0; slot < configInventory.getSlots(); slot++) {
-            ItemStack cfgStack = configInventory.getStackInSlot(slot);
-            ItemStack invStack = inventory.getStackInSlot(slot);
-
-            if (cfgStack.isEmpty()) {
-                if (!invStack.isEmpty()) {
-                    return true;
-                }
-                continue;
-            }
-
-            if (invStack.isEmpty()) {
-                return true;
-            }
-
-            if (!ItemUtils.matchStacks(cfgStack, invStack) || invStack.getCount() != cfgStack.getCount()) {
-                return true;
-            }
-        }
-        return false;
+        return this.getPollingTickingRequest();
     }
 
     @Nonnull
     @Override
     public TickRateModulation tickingRequest(@Nonnull final IGridNode node, final int ticksSinceLastCall) {
         if (!proxy.isActive()) {
-            return TickRateModulation.IDLE;
+            return this.getInactiveTickRateModulation();
         }
 
         int[] needUpdateSlots = getNeedUpdateSlots();
         if (needUpdateSlots.length == 0) {
-            return TickRateModulation.SLOWER;
+            return this.getNoWorkTickRateModulation(ticksSinceLastCall);
         }
 
         ReadWriteLock rwLock = inventory.getRWLock();
@@ -219,13 +196,34 @@ public class MEItemInputBus extends MEItemBus implements SettingsTransfer {
 
             inTick = false;
             rwLock.writeLock().unlock();
-            return successAtLeastOnce ? TickRateModulation.FASTER : TickRateModulation.SLOWER;
+            return this.getWorkTickRateModulation(successAtLeastOnce, ticksSinceLastCall);
         } catch (GridAccessException e) {
             inTick = false;
             changedSlots = new boolean[changedSlots.length];
             rwLock.writeLock().unlock();
             return TickRateModulation.IDLE;
         }
+    }
+
+    @Override
+    protected boolean hasWorkToDo() {
+        for (int slot = 0; slot < configInventory.getSlots(); slot++) {
+            ItemStack cfgStack = configInventory.getStackInSlot(slot);
+            ItemStack invStack = inventory.getStackInSlot(slot);
+
+            if (cfgStack.isEmpty()) {
+                if (!invStack.isEmpty()) return true;
+                continue;
+            }
+
+            if (invStack.isEmpty()) return true;
+
+            if (!ItemUtils.matchStacks(cfgStack, invStack) || invStack.getCount() != cfgStack.getCount()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private ItemStack extractStackFromAE(final IMEMonitor<IAEItemStack> inv, final ItemStack stack) throws GridAccessException {
@@ -258,17 +256,10 @@ public class MEItemInputBus extends MEItemBus implements SettingsTransfer {
         return AE_STACK_CACHE.computeIfAbsent(stack, v -> channel.createStack(stack));
     }
 
+    @Nonnull
     @Override
-    public void markNoUpdate() {
-        if (hasChangedSlots()) {
-            try {
-                proxy.getTick().alertDevice(proxy.getNode());
-            } catch (GridAccessException e) {
-                // NO-OP
-            }
-        }
-
-        super.markNoUpdate();
+    public GuiType getMainGuiType() {
+        return GuiType.ME_ITEM_INPUT_BUS;
     }
 
     public boolean configInvHasItem() {
@@ -300,16 +291,14 @@ public class MEItemInputBus extends MEItemBus implements SettingsTransfer {
     public NBTTagCompound downloadSettings() {
         NBTTagCompound tag = new NBTTagCompound();
         tag.setTag(CONFIG_TAG_KEY, configInventory.writeNBT());
+        this.writePollingSettings(tag);
         return tag;
     }
 
     @Override
     public void uploadSettings(NBTTagCompound settings) {
         readConfigInventoryNBT(settings.getCompoundTag(CONFIG_TAG_KEY));
-        try {
-            proxy.getTick().alertDevice(proxy.getNode());
-        } catch (GridAccessException e) {
-            ModularMachinery.log.warn("Error while uploading settings", e);
-        }
+        this.readPollingSettings(settings);
+        this.markForUpdate();
     }
 }

@@ -134,6 +134,8 @@ public class ModularMachinery {
         if (Mods.AE2.isPresent()) {
             NET_CHANNEL.registerMessage(PktMEOutputBusStackSizeChange.class, PktMEOutputBusStackSizeChange.class, 107, Side.SERVER);
             NET_CHANNEL.registerMessage(PktSwitchGuiMEOutputBus.class, PktSwitchGuiMEOutputBus.class, 108, Side.SERVER);
+            NET_CHANNEL.registerMessage(PktOpenMEBusGui.class, PktOpenMEBusGui.class, 109, Side.SERVER);
+            NET_CHANNEL.registerMessage(PktSetMEBusPollingRate.class, PktSetMEBusPollingRate.class, 110, Side.SERVER);
         }
 
         CommonProxy.loadModData(event.getModConfigurationDirectory());

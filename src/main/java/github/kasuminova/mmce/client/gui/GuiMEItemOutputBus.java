@@ -5,9 +5,11 @@ import appeng.api.config.Settings;
 import appeng.client.gui.widgets.GuiImgButton;
 import appeng.core.localization.GuiText;
 import github.kasuminova.mmce.common.container.ContainerMEItemOutputBus;
+import github.kasuminova.mmce.common.network.PktOpenMEBusGui;
 import github.kasuminova.mmce.common.network.PktSwitchGuiMEOutputBus;
 import github.kasuminova.mmce.common.tile.MEItemOutputBus;
 import hellfirepvp.modularmachinery.ModularMachinery;
+import hellfirepvp.modularmachinery.common.CommonProxy.GuiType;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
@@ -21,6 +23,7 @@ public class GuiMEItemOutputBus extends GuiMEItemBus {
     private static final ResourceLocation TEXTURES_OUTPUT_BUS = new ResourceLocation("appliedenergistics2", "textures/guis/skychest.png");
 
     private CustomStackSizeButton stackSizeBtn;
+    private GuiMEBusPollingButton pollingRateBtn;
     private final MEItemOutputBus outputBus;
 
     public GuiMEItemOutputBus(final MEItemOutputBus te, final EntityPlayer player) {
@@ -33,11 +36,12 @@ public class GuiMEItemOutputBus extends GuiMEItemBus {
     public void initGui() {
         super.initGui();
 
-        this.stackSizeBtn = new CustomStackSizeButton(
-                this.guiLeft - 18,
-                this.guiTop + 8
-        );
+        this.stackSizeBtn = new CustomStackSizeButton(this.guiLeft - 18, this.guiTop + 8);
         this.buttonList.add(this.stackSizeBtn);
+
+        this.pollingRateBtn = new GuiMEBusPollingButton(
+            this.guiLeft - 18, this.guiTop + 28, this.outputBus::getPollingRate);
+        this.buttonList.add(this.pollingRateBtn);
     }
 
     @Override
@@ -46,7 +50,11 @@ public class GuiMEItemOutputBus extends GuiMEItemBus {
 
         if (btn == this.stackSizeBtn) {
             ModularMachinery.NET_CHANNEL.sendToServer(
-                    new PktSwitchGuiMEOutputBus(this.outputBus.getPos(), 1)
+                new PktSwitchGuiMEOutputBus(this.outputBus.getPos(), 1)
+            );
+        } else if (btn == this.pollingRateBtn) {
+            ModularMachinery.NET_CHANNEL.sendToServer(
+                new PktOpenMEBusGui(this.outputBus.getPos(), GuiType.ME_BUS_POLLING)
             );
         }
     }

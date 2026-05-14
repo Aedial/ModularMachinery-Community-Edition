@@ -5,16 +5,22 @@ import appeng.core.localization.GuiText;
 import com.mekeng.github.client.slots.SlotGasTank;
 import com.mekeng.github.common.me.inventory.impl.GasInventory;
 import github.kasuminova.mmce.common.container.ContainerMEGasOutputBus;
+import github.kasuminova.mmce.common.network.PktOpenMEBusGui;
 import github.kasuminova.mmce.common.tile.MEGasOutputBus;
 import hellfirepvp.modularmachinery.ModularMachinery;
+import hellfirepvp.modularmachinery.common.CommonProxy.GuiType;
+import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
+
+import java.io.IOException;
 
 public class GuiMEGasOutputBus extends GuiUpgradeable {
     private static final ResourceLocation TEXTURES_OUTPUT_BUS = new ResourceLocation(ModularMachinery.MODID, "textures/gui/mefluidoutputbus.png");
 
     private final MEGasOutputBus bus;
+    private GuiMEBusPollingButton pollingRateBtn;
 
     public GuiMEGasOutputBus(final MEGasOutputBus te, final EntityPlayer player) {
         super(new ContainerMEGasOutputBus(te, player));
@@ -35,6 +41,20 @@ public class GuiMEGasOutputBus extends GuiUpgradeable {
 
     @Override
     protected void addButtons() {
+        this.pollingRateBtn = new GuiMEBusPollingButton(
+            this.guiLeft - 18, this.guiTop + 8, this.bus::getPollingRate);
+        this.buttonList.add(this.pollingRateBtn);
+    }
+
+    @Override
+    protected void actionPerformed(final GuiButton btn) throws IOException {
+        super.actionPerformed(btn);
+
+        if (btn == this.pollingRateBtn) {
+            ModularMachinery.NET_CHANNEL.sendToServer(
+                new PktOpenMEBusGui(this.bus.getPos(), GuiType.ME_BUS_POLLING)
+            );
+        }
     }
 
     @Override
