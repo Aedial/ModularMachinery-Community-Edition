@@ -43,6 +43,8 @@ public class Config {
     public static boolean asyncControllerModelRender         = true;
     public static boolean enableDurationMultiplier           = true;
     public static int     machineColor;
+    public static int     meFluidBusBaseCapacity             = 8000;
+    public static int     meGasBusBaseCapacity               = 8000;
     public static int     maxMachineParallelism              = 2048;
     public static int     defaultFactoryMaxThread            = 20;
 
@@ -107,6 +109,18 @@ public class Config {
         // FluxNetworks Integration
         enableFluxNetworksIntegration = lastReadConfig.getBoolean("enable-fluxnetworks-integration", "general", true,
             "When enabled, allows you to use the flux network to transfer larger amounts of energy than 2147483647.");
+
+        // Base Capacity of ME Buses
+        meFluidBusBaseCapacity = lastReadConfig.getInt(
+            "me-fluid-bus-base-capacity", "general",
+            8000, 1, Integer.MAX_VALUE,
+            "The base tank capacity of each ME Fluid Bus slot before Capacity Card multipliers are applied. The final per-slot capacity clamps at Integer.MAX_VALUE."
+        );
+        meGasBusBaseCapacity = lastReadConfig.getInt(
+            "me-gas-bus-base-capacity", "general",
+            8000, 1, Integer.MAX_VALUE,
+            "The base tank capacity of each ME Gas Bus slot before Capacity Card multipliers are applied. The final per-slot capacity clamps at Integer.MAX_VALUE."
+        );
 
         // Parallelize Feature
         machineParallelizeEnabledByDefault = lastReadConfig.getBoolean("machine-parallelize-enabled-bydefault",

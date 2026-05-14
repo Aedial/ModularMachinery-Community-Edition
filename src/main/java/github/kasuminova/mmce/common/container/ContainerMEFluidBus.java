@@ -25,11 +25,14 @@ public abstract class ContainerMEFluidBus extends ContainerUpgradeable implement
     private final   MEFluidBus      owner;
     @GuiSync(7)
     public          int             capacityUpgrades = 0;
+    @GuiSync(8)
+    public          int             tankCapacity = 0;
 
     public ContainerMEFluidBus(final InventoryPlayer ip, final MEFluidBus te) {
         super(ip, te);
         this.owner = te;
         this.tankSync = new FluidSyncHelper(owner.getTanks(), 0);
+        this.tankCapacity = ((AEFluidInventoryUpgradeable) owner.getTanks()).getCapacity();
     }
 
     @Override
@@ -73,6 +76,11 @@ public abstract class ContainerMEFluidBus extends ContainerUpgradeable implement
             if (capacityUpgrades != installedUpgrades) {
                 capacityUpgrades = installedUpgrades;
             }
+
+            int currentTankCapacity = ((AEFluidInventoryUpgradeable) this.owner.getTanks()).getCapacity();
+            if (this.tankCapacity != currentTankCapacity) {
+                this.tankCapacity = currentTankCapacity;
+            }
         }
 
         super.detectAndSendChanges();
@@ -81,11 +89,22 @@ public abstract class ContainerMEFluidBus extends ContainerUpgradeable implement
     @Override
     public void onUpdate(final String field, final Object oldValue, final Object newValue) {
         super.onUpdate(field, oldValue, newValue);
-        if (Platform.isClient() && field.equals("capacityUpgrades")) {
-            this.capacityUpgrades = (int) newValue;
-            ((AEFluidInventoryUpgradeable) this.owner.getTanks()).setCapacity(
-                (int) (Math.pow(4, this.capacityUpgrades + 1) * (MEFluidBus.TANK_DEFAULT_CAPACITY / 4)));
+
+        if (!Platform.isClient()) {
+            return;
         }
+
+        if ("capacityUpgrades".equals(field)) {
+            this.capacityUpgrades = (int) newValue;
+            return;
+        }
+
+        if (!"tankCapacity".equals(field)) {
+            return;
+        }
+
+        this.tankCapacity = (int) newValue;
+        ((AEFluidInventoryUpgradeable) this.owner.getTanks()).setCapacity(this.tankCapacity);
     }
 
     @Override

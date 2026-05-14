@@ -16,6 +16,7 @@ import com.mekeng.github.common.me.inventory.IGasInventoryHost;
 import com.mekeng.github.common.me.inventory.impl.GasInventory;
 import com.mekeng.github.common.me.storage.IGasStorageChannel;
 import github.kasuminova.mmce.common.util.GasInventoryHandler;
+import hellfirepvp.modularmachinery.common.data.Config;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import mekanism.api.gas.IGasHandler;
@@ -40,7 +41,7 @@ public abstract class MEGasBus extends MEMachineComponent implements
     IGridTickable {
 
     public static final int TANK_SLOT_AMOUNT      = 9;
-    public static final int TANK_DEFAULT_CAPACITY = 8000;
+    public static       int TANK_DEFAULT_CAPACITY = Config.meGasBusBaseCapacity;
 
     protected final IGasStorageChannel  channel           = AEApi.instance().storage().getStorageChannel(IGasStorageChannel.class);
     protected final ConfigManager       cm                = new ConfigManager(this);
@@ -53,10 +54,32 @@ public abstract class MEGasBus extends MEMachineComponent implements
     protected boolean inTick = false;
 
     public MEGasBus() {
-        this.tanks = new GasInventory(TANK_SLOT_AMOUNT, TANK_DEFAULT_CAPACITY, this);
+        this.tanks = new GasInventory(TANK_SLOT_AMOUNT, getBaseTankCapacity(), this);
         this.handler = new GasInventoryHandler(tanks);
         this.upgrades = new StackUpgradeInventory(proxy.getMachineRepresentation(), this, 5);
         this.changedSlots = new boolean[TANK_SLOT_AMOUNT];
+    }
+
+    public static int getBaseTankCapacity() {
+        TANK_DEFAULT_CAPACITY = Math.max(1, Config.meGasBusBaseCapacity);
+        return TANK_DEFAULT_CAPACITY;
+    }
+
+    public static int calculateTankCapacity(final int capacityUpgrades) {
+        long capacity = getBaseTankCapacity();
+        int remainingUpgrades = Math.max(0, capacityUpgrades);
+
+        // Capacity cards multiply tank size by four, so clamp before the next step would overflow.
+        while (remainingUpgrades > 0) {
+            if (capacity > Integer.MAX_VALUE / 4L) {
+                return Integer.MAX_VALUE;
+            }
+
+            capacity *= 4L;
+            remainingUpgrades--;
+        }
+
+        return (int) capacity;
     }
 
     protected synchronized int[] getNeedUpdateSlots() {
@@ -77,6 +100,10 @@ public abstract class MEGasBus extends MEMachineComponent implements
 
     public GasInventory getTanks() {
         return tanks;
+    }
+
+    public int getTankCapacity() {
+        return tanks.getTanks()[0].getMaxGas();
     }
 
     @Override
@@ -155,8 +182,7 @@ public abstract class MEGasBus extends MEMachineComponent implements
     }
 
     private void updateTankCapacity() {
-        tanks.setCap(
-            (int) (Math.pow(4, getInstalledUpgrades(Upgrades.CAPACITY) + 1) * (MEGasBus.TANK_DEFAULT_CAPACITY / 4)));
+        tanks.setCap(calculateTankCapacity(getInstalledUpgrades(Upgrades.CAPACITY)));
     }
 
     @Override

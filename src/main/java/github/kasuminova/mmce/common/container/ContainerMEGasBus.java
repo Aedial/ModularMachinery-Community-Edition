@@ -10,7 +10,6 @@ import appeng.util.Platform;
 import com.mekeng.github.common.container.sync.IGasSyncContainer;
 import com.mekeng.github.common.me.data.IAEGasStack;
 import com.mekeng.github.util.helpers.GasSyncHelper;
-import github.kasuminova.mmce.common.tile.base.MEFluidBus;
 import github.kasuminova.mmce.common.tile.base.MEGasBus;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.IContainerListener;
@@ -27,10 +26,14 @@ public abstract class ContainerMEGasBus extends ContainerUpgradeable implements 
     @GuiSync(7)
     public int capacityUpgrades = 0;
 
+    @GuiSync(8)
+    public int tankCapacity = 0;
+
     public ContainerMEGasBus(final InventoryPlayer ip, final MEGasBus te) {
         super(ip, te);
         this.owner = te;
         this.tankSync = GasSyncHelper.create(owner.getTanks(), 0);
+        this.tankCapacity = owner.getTankCapacity();
     }
 
     @Override
@@ -74,6 +77,11 @@ public abstract class ContainerMEGasBus extends ContainerUpgradeable implements 
             if (capacityUpgrades != installedUpgrades) {
                 capacityUpgrades = installedUpgrades;
             }
+
+            int currentTankCapacity = this.owner.getTankCapacity();
+            if (this.tankCapacity != currentTankCapacity) {
+                this.tankCapacity = currentTankCapacity;
+            }
         }
 
         super.detectAndSendChanges();
@@ -82,12 +90,22 @@ public abstract class ContainerMEGasBus extends ContainerUpgradeable implements 
     @Override
     public void onUpdate(final String field, final Object oldValue, final Object newValue) {
         super.onUpdate(field, oldValue, newValue);
-        if (Platform.isClient() && field.equals("capacityUpgrades")) {
-            this.capacityUpgrades = (int) newValue;
-            this.owner.getTanks().setCap(
-                (int) (Math.pow(4, this.capacityUpgrades + 1) * (MEFluidBus.TANK_DEFAULT_CAPACITY / 4))
-            );
+
+        if (!Platform.isClient()) {
+            return;
         }
+
+        if ("capacityUpgrades".equals(field)) {
+            this.capacityUpgrades = (int) newValue;
+            return;
+        }
+
+        if (!"tankCapacity".equals(field)) {
+            return;
+        }
+
+        this.tankCapacity = (int) newValue;
+        this.owner.getTanks().setCap(this.tankCapacity);
     }
 
     @Override

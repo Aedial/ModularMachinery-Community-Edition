@@ -15,6 +15,7 @@ import appeng.util.IConfigManagerHost;
 import appeng.util.inv.IAEAppEngInventory;
 import appeng.util.inv.InvOperation;
 import github.kasuminova.mmce.common.util.AEFluidInventoryUpgradeable;
+import hellfirepvp.modularmachinery.common.data.Config;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.item.ItemStack;
@@ -40,7 +41,7 @@ public abstract class MEFluidBus extends MEMachineComponent implements
     IGridTickable {
 
     public static final int TANK_SLOT_AMOUNT      = 9;
-    public static final int TANK_DEFAULT_CAPACITY = 8000;
+    public static       int TANK_DEFAULT_CAPACITY = Config.meFluidBusBaseCapacity;
 
     protected final IFluidStorageChannel        channel           = AEApi.instance().storage().getStorageChannel(IFluidStorageChannel.class);
     protected final ConfigManager               cm                = new ConfigManager(this);
@@ -53,9 +54,31 @@ public abstract class MEFluidBus extends MEMachineComponent implements
     protected       boolean                     inTick            = false;
 
     public MEFluidBus() {
-        this.tanks = new AEFluidInventoryUpgradeable(this, TANK_SLOT_AMOUNT, TANK_DEFAULT_CAPACITY);
+        this.tanks = new AEFluidInventoryUpgradeable(this, TANK_SLOT_AMOUNT, getBaseTankCapacity());
         this.upgrades = new StackUpgradeInventory(proxy.getMachineRepresentation(), this, 5);
         this.changedSlots = new boolean[TANK_SLOT_AMOUNT];
+    }
+
+    public static int getBaseTankCapacity() {
+        TANK_DEFAULT_CAPACITY = Math.max(1, Config.meFluidBusBaseCapacity);
+        return TANK_DEFAULT_CAPACITY;
+    }
+
+    public static int calculateTankCapacity(final int capacityUpgrades) {
+        long capacity = getBaseTankCapacity();
+        int remainingUpgrades = Math.max(0, capacityUpgrades);
+
+        // Capacity cards multiply tank size by four, so clamp before the next step would overflow.
+        while (remainingUpgrades > 0) {
+            if (capacity > Integer.MAX_VALUE / 4L) {
+                return Integer.MAX_VALUE;
+            }
+
+            capacity *= 4L;
+            remainingUpgrades--;
+        }
+
+        return (int) capacity;
     }
 
     protected synchronized int[] getNeedUpdateSlots() {
@@ -146,8 +169,7 @@ public abstract class MEFluidBus extends MEMachineComponent implements
     }
 
     private void updateTankCapacity() {
-        tanks.setCapacity(
-            (int) (Math.pow(4, getInstalledUpgrades(Upgrades.CAPACITY) + 1) * (MEFluidBus.TANK_DEFAULT_CAPACITY / 4)));
+        tanks.setCapacity(calculateTankCapacity(getInstalledUpgrades(Upgrades.CAPACITY)));
     }
 
     @Override
