@@ -48,7 +48,7 @@ public class TileItemInputBus extends TileItemBus implements MachineComponentTil
 
     @Override
     public void doRestrictedTick() {
-        if (getWorld().isRemote || !canWork(minWorkDelay, maxWorkDelay)) {
+        if (getWorld().isRemote || isExternalIODisabled() || !canWork(minWorkDelay, maxWorkDelay)) {
             return;
         }
 

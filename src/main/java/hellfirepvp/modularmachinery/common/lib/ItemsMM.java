@@ -11,6 +11,8 @@ package hellfirepvp.modularmachinery.common.lib;
 import hellfirepvp.modularmachinery.common.item.ItemBlueprint;
 import hellfirepvp.modularmachinery.common.item.ItemConstructTool;
 import hellfirepvp.modularmachinery.common.item.ItemModularium;
+import hellfirepvp.modularmachinery.common.item.ItemSolvent;
+import hellfirepvp.modularmachinery.common.item.ItemTubeOfGlue;
 import net.minecraft.item.Item;
 
 /**
@@ -25,6 +27,8 @@ public class ItemsMM {
     public static ItemBlueprint     blueprint;
     public static ItemModularium    modularium;
     public static ItemConstructTool constructTool;
+    public static ItemTubeOfGlue    tubeOfGlue;
+    public static ItemSolvent       solvent;
 
     // AppEng Compat
 

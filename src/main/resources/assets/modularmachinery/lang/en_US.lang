@@ -207,6 +207,11 @@ message.blockmepatternprovider.load=Loaded pattern provider coordinates!
 message.blockmepatternprovider.tip0=Use a memory card to bind the ME Mechanical Template Provider!
 message.blockmepatternprovider.tip1=Bound provider coordinates at X:%s, Y:%s, Z:%s.
 
+message.itembus.external_io.disabled=External item IO disabled.
+message.itembus.external_io.enabled=External item IO enabled.
+message.itembus.external_io.already_disabled=External item IO is already disabled.
+message.itembus.external_io.already_enabled=External item IO is already enabled.
+
 tooltip.item.controller.owner.self=§aYou are the owner of the controller.
 tooltip.item.controller.owner.not_self=§cYou are not the owner of the controller.
 
@@ -258,8 +263,8 @@ tooltip.constructtool.creative=Creative Structure-To-JSON Tool
 
 tooltip.itembus.slot=1 Slot
 tooltip.itembus.slots=%s Slots
-
-tooltip.mepatternmirrorimage=Use Memory Card to bind the corresponding ME Machinery Pattern Provider.
+tooltip.itembus.external_io.disable=Right-click an Item Bus to disable external item IO.
+tooltip.itembus.external_io.enable=Right-click an Item Bus to re-enable external item IO.
 
 tooltip.groupinput.block=Modify group settings by shift+right-clicking the block when empty-handed
 
@@ -307,6 +312,8 @@ tooltip.modularmachinery.machine_projector=Sneak and right-click the controller 
 item.modularmachinery.itemblueprint.name=Machine Blueprint
 item.modularmachinery.itemmodularium.name=Modularium
 item.modularmachinery.itemconstructtool.name=Construct Selection Tool
+item.modularmachinery.itemtubeofglue.name=Tube of Glue
+item.modularmachinery.itemsolvent.name=Solvent
 item.modularmachinery.machine_projector.name=Machine Projector
 
 block.modularmachinery.crushing_wheels.name=Crushing Wheels

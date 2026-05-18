@@ -20,9 +20,12 @@ import net.minecraft.util.math.MathHelper;
  * Date: 09.07.2017 / 17:37
  */
 public abstract class TileItemBus extends TileInventory implements SelectiveUpdateTileEntity {
+    private static final String NBT_EXTERNAL_IO_DISABLED = "disableExternalIO";
+
     protected int         successCounter   = 0;
     protected boolean     inventoryChanged = false;
     private   ItemBusSize size;
+    private   boolean     externalIODisabled = false;
 
     public TileItemBus() {
     }
@@ -66,11 +69,28 @@ public abstract class TileItemBus extends TileInventory implements SelectiveUpda
         return size;
     }
 
+    public boolean isExternalIODisabled() {
+        return externalIODisabled;
+    }
+
+    public boolean setExternalIODisabled(boolean externalIODisabled) {
+        if (this.externalIODisabled == externalIODisabled) return false;
+
+        this.externalIODisabled = externalIODisabled;
+        this.successCounter = 0;
+        this.inventoryChanged = true;
+
+        if (getWorld() != null && !getWorld().isRemote) markForUpdate();
+
+        return true;
+    }
+
     @Override
     public void readCustomNBT(NBTTagCompound compound) {
         super.readCustomNBT(compound);
 
         this.size = ItemBusSize.values()[MathHelper.clamp(compound.getInteger("busSize"), 0, ItemBusSize.values().length - 1)];
+        this.externalIODisabled = compound.getBoolean(NBT_EXTERNAL_IO_DISABLED);
     }
 
     @Override
@@ -78,5 +98,10 @@ public abstract class TileItemBus extends TileInventory implements SelectiveUpda
         super.writeCustomNBT(compound);
 
         compound.setInteger("busSize", this.size.ordinal());
+        if (this.externalIODisabled) {
+            compound.setBoolean(NBT_EXTERNAL_IO_DISABLED, true);
+        } else {
+            compound.removeTag(NBT_EXTERNAL_IO_DISABLED);
+        }
     }
 }

@@ -12,9 +12,11 @@ import hellfirepvp.modularmachinery.ModularMachinery;
 import hellfirepvp.modularmachinery.common.CommonProxy;
 import hellfirepvp.modularmachinery.common.item.ItemBlockCustomName;
 import hellfirepvp.modularmachinery.common.item.ItemBlueprint;
+import hellfirepvp.modularmachinery.common.item.ItemSolvent;
 import hellfirepvp.modularmachinery.common.item.ItemConstructTool;
 import hellfirepvp.modularmachinery.common.item.ItemDynamicColor;
 import hellfirepvp.modularmachinery.common.item.ItemModularium;
+import hellfirepvp.modularmachinery.common.item.ItemTubeOfGlue;
 import net.minecraft.item.Item;
 import youyihj.mmce.common.item.MachineProjector;
 
@@ -25,6 +27,8 @@ import java.util.List;
 import static hellfirepvp.modularmachinery.common.lib.ItemsMM.blueprint;
 import static hellfirepvp.modularmachinery.common.lib.ItemsMM.constructTool;
 import static hellfirepvp.modularmachinery.common.lib.ItemsMM.modularium;
+import static hellfirepvp.modularmachinery.common.lib.ItemsMM.solvent;
+import static hellfirepvp.modularmachinery.common.lib.ItemsMM.tubeOfGlue;
 
 /**
  * This class is part of the Modular Machinery Mod
@@ -44,6 +48,8 @@ public class RegistryItems {
         blueprint = prepareRegister(new ItemBlueprint());
         modularium = prepareRegister(new ItemModularium());
         constructTool = prepareRegister(new ItemConstructTool());
+        tubeOfGlue = prepareRegister(new ItemTubeOfGlue());
+        solvent = prepareRegister(new ItemSolvent());
         prepareRegisterWithCustomName(MachineProjector.INSTANCE);
 
         registerItemBlocks();
