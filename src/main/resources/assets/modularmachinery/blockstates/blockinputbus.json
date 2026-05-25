@@ -1,11 +1,36 @@
 {
-    "variants": {
-        "size=tiny": { "model":"modularmachinery:blockinputbus_tiny" },
-        "size=small": { "model":"modularmachinery:blockinputbus_small" },
-        "size=normal": { "model":"modularmachinery:blockinputbus_normal" },
-        "size=reinforced": { "model":"modularmachinery:blockinputbus_reinforced" },
-        "size=big": { "model":"modularmachinery:blockinputbus_big" },
-        "size=huge": { "model":"modularmachinery:blockinputbus_huge" },
-        "size=ludicrous": { "model":"modularmachinery:blockinputbus_ludicrous" }
-    }
+    "multipart": [
+        {
+            "when": { "size": "tiny" },
+            "apply": { "model": "modularmachinery:blockinputbus_tiny" }
+        },
+        {
+            "when": { "size": "small" },
+            "apply": { "model": "modularmachinery:blockinputbus_small" }
+        },
+        {
+            "when": { "size": "normal" },
+            "apply": { "model": "modularmachinery:blockinputbus_normal" }
+        },
+        {
+            "when": { "size": "reinforced" },
+            "apply": { "model": "modularmachinery:blockinputbus_reinforced" }
+        },
+        {
+            "when": { "size": "big" },
+            "apply": { "model": "modularmachinery:blockinputbus_big" }
+        },
+        {
+            "when": { "size": "huge" },
+            "apply": { "model": "modularmachinery:blockinputbus_huge" }
+        },
+        {
+            "when": { "size": "ludicrous" },
+            "apply": { "model": "modularmachinery:blockinputbus_ludicrous" }
+        },
+        {
+            "when": { "glued": "true" },
+            "apply": { "model": "modularmachinery:blockbus_glued_overlay" }
+        }
+    ]
 }

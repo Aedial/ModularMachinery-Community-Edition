@@ -17,6 +17,7 @@ import hellfirepvp.modularmachinery.common.modifier.RecipeModifier;
 import hellfirepvp.modularmachinery.common.tiles.TileFactoryController;
 import hellfirepvp.modularmachinery.common.tiles.TileMachineController;
 import hellfirepvp.modularmachinery.common.tiles.TileParallelController;
+import hellfirepvp.modularmachinery.common.tiles.base.TileItemBus;
 import hellfirepvp.modularmachinery.common.tiles.base.TileMultiblockMachineController;
 import hellfirepvp.modularmachinery.common.util.MiscUtils;
 import io.netty.util.internal.ThrowableUtil;
@@ -41,6 +42,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class MMInfoProvider implements IProbeInfoProvider {
+    private static void processItemBusTOP(TileItemBus itemBus, IProbeInfo probeInfo) {
+        if (itemBus.isExternalIODisabled()) {
+            probeInfo.text(TextFormatting.AQUA + "{*top.itembus.glued*}");
+        }
+    }
+
     private static void processParallelControllerTOP(TileParallelController parallelController, IProbeInfo probeInfo) {
         if (!ModIntegrationTOP.showParallelControllerInfo) {
             return;
@@ -409,6 +416,8 @@ public class MMInfoProvider implements IProbeInfoProvider {
             }
         } else if (tileEntity instanceof TileParallelController parallelController) {
             processParallelControllerTOP(parallelController, probeInfo);
+        } else if (tileEntity instanceof TileItemBus itemBus) {
+            processItemBusTOP(itemBus, probeInfo);
         }
     }
 

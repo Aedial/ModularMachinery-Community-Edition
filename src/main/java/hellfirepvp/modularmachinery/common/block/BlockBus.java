@@ -9,6 +9,7 @@ import hellfirepvp.modularmachinery.common.util.IOInventory;
 import hellfirepvp.modularmachinery.common.util.RedstoneHelper;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
@@ -23,6 +24,7 @@ import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.NonNullList;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextFormatting;
@@ -36,6 +38,7 @@ import java.util.List;
 
 public abstract class BlockBus extends BlockMachineComponent implements BlockCustomName, BlockVariants {
     protected static final PropertyEnum<ItemBusSize> BUS_TYPE = PropertyEnum.create("size", ItemBusSize.class);
+    protected static final PropertyBool              GLUED    = PropertyBool.create("glued");
 
     public BlockBus() {
         super(Material.IRON);
@@ -44,6 +47,7 @@ public abstract class BlockBus extends BlockMachineComponent implements BlockCus
         setSoundType(SoundType.METAL);
         setHarvestLevel("pickaxe", 1);
         setCreativeTab(CommonProxy.creativeTabModularMachinery);
+        setDefaultState(this.blockState.getBaseState().withProperty(BUS_TYPE, ItemBusSize.TINY).withProperty(GLUED, false));
     }
 
     @Override
@@ -105,7 +109,7 @@ public abstract class BlockBus extends BlockMachineComponent implements BlockCus
 
     @Override
     public IBlockState getStateFromMeta(int meta) {
-        return getDefaultState().withProperty(BUS_TYPE, ItemBusSize.values()[meta]);
+        return getDefaultState().withProperty(BUS_TYPE, ItemBusSize.values()[meta]).withProperty(GLUED, false);
     }
 
     @Override
@@ -114,15 +118,25 @@ public abstract class BlockBus extends BlockMachineComponent implements BlockCus
     }
 
     @Override
+    public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
+        TileEntity tileEntity = worldIn.getTileEntity(pos);
+        if (!(tileEntity instanceof TileItemBus)) {
+            return state.withProperty(GLUED, false);
+        }
+
+        return state.withProperty(GLUED, ((TileItemBus) tileEntity).isExternalIODisabled());
+    }
+
+    @Override
     protected BlockStateContainer createBlockState() {
-        return new BlockStateContainer(this, BUS_TYPE);
+        return new BlockStateContainer(this, BUS_TYPE, GLUED);
     }
 
     @Override
     public Iterable<IBlockState> getValidStates() {
         List<IBlockState> ret = new LinkedList<>();
         for (ItemBusSize type : ItemBusSize.values()) {
-            ret.add(getDefaultState().withProperty(BUS_TYPE, type));
+            ret.add(getDefaultState().withProperty(BUS_TYPE, type).withProperty(GLUED, false));
         }
         return ret;
     }

@@ -140,6 +140,7 @@ top.machine.owner.unknown=Unknown
 top.machine.working=Processing
 top.machine.structure.found=Structure formed
 top.machine.structure.none=Missing structure
+top.itembus.glued=Automatic I/O disabled by glue
 top.max_parallelism=Max Parallelism:
 top.parallelism=Parallelism:
 top.factory.thread=Thread #
