@@ -1,27 +1,88 @@
-name: Build mod
+name: build
 
-on: [ push, pull_request, workflow_dispatch ]
+on:
+  push:
+    branches:
+      - '**'
+    tags:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
-    name: Build mod
     runs-on: ubuntu-latest
-
+    env:
+      CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 1.8
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'adopt'
-        java-version: '8'
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v3
-    - name: Build with Gradle
-      run: ./gradlew -Pnet.minecraftforge.gradle.disableUpdateChecker=true build
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: ModularMachinery-CE
-        path: build/libs
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Gradle 8.14/RFG 1.4.9 needs Java 21
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: '21'
+
+      - name: Cache Gradle and RFG
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.gradle/jdks
+          key: gradle-${{ runner.os }}-rfg-1_12_2-${{ hashFiles('**/*.gradle*', 'gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-rfg-1_12_2-
+
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
+      - name: Build
+        run: |
+          ./gradlew --version
+          ./gradlew setupDecompWorkspace --info
+          ./gradlew build --info
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: modularmachinery-community-edition-jar
+          path: build/libs/*.jar
+
+      - name: Publish GitHub Release (tags only)
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${GITHUB_REF##*/}"
+          VERSION=$(./gradlew -q printVersion)
+          FULL_VERSION=$(./gradlew -q printFullVersion)
+          RELEASE_TYPE=$(./gradlew -q printReleaseType)
+          NOTES_FILE="/tmp/release_notes.md"
+
+          if [[ -f CHANGELOG.md ]]; then
+            ./gradlew -q printChangelog > "$NOTES_FILE"
+          else
+            printf 'Release %s\n' "$FULL_VERSION" > "$NOTES_FILE"
+          fi
+
+          gh release create "$TAG" build/libs/*.jar \
+            --title "$FULL_VERSION" \
+            --notes-file "$NOTES_FILE" \
+            $(if [[ "$RELEASE_TYPE" != "release" ]]; then echo "--prerelease"; fi)
+
+      - name: Publish to CurseForge (configured tags only)
+        if: ${{ env.CURSEFORGE_TOKEN != '' && vars.CURSEFORGE_PROJECT_ID != '' && startsWith(github.ref, 'refs/tags/') }}
+        run: |
+          RELEASE_TYPE=$(./gradlew -q printReleaseType)
+          ./gradlew curseforge --no-daemon \
+            -Ppublish_to_curseforge=true \
+            -Pcurseforge_project_id="${{ vars.CURSEFORGE_PROJECT_ID }}" \
+            -Prelease_type="$RELEASE_TYPE"

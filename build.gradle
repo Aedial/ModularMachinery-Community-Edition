@@ -1,0 +1,349 @@
+import com.gtnewhorizons.retrofuturagradle.mcp.InjectTagsTask
+import net.darkhax.curseforgegradle.TaskPublishCurseForge
+import org.jetbrains.changelog.Changelog
+import org.jetbrains.gradle.ext.Gradle
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
+
+plugins {
+    id 'java'
+    id 'java-library'
+    id 'maven-publish'
+    id 'org.jetbrains.kotlin.jvm' version '2.2.0'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '2.2.0'
+    id 'org.jetbrains.gradle.plugin.idea-ext' version '1.4.1'
+    // Need 1.4.X for Kotlin / Gradle 8.14 (2.X.X needs Gradle 9)
+    id 'com.gtnewhorizons.retrofuturagradle' version '1.4.9'
+    // Need 1.1.X for Gradle 8.14 (1.2.X needs Gradle 9)
+    id 'net.darkhax.curseforgegradle' version '1.1.28' apply false
+    id 'com.modrinth.minotaur' version '2.+' apply false
+    id 'org.jetbrains.changelog' version '2.5.0'
+}
+
+apply from: 'gradle/scripts/helpers.gradle'
+
+// Required project metadata.
+assertProperty 'mod_version'
+assertProperty 'root_package'
+assertProperty 'mod_id'
+assertProperty 'mod_name'
+
+assertSubProperties 'use_tags', 'tag_class_name'
+assertSubProperties 'use_access_transformer', 'access_transformer_locations'
+assertSubProperties 'use_mixins', 'mixin_booter_version', 'mixin_refmap'
+assertSubProperties 'is_coremod', 'coremod_includes_mod', 'coremod_plugin_class_name'
+assertSubProperties 'use_asset_mover', 'asset_mover_version'
+
+setDefaultProperty 'use_modern_java_syntax', false, false
+setDefaultProperty 'generate_sources_jar', true, false
+setDefaultProperty 'generate_javadocs_jar', true, false
+setDefaultProperty 'mapping_channel', true, 'stable'
+setDefaultProperty 'mapping_version', true, '39'
+setDefaultProperty 'use_dependency_at_files', true, true
+setDefaultProperty 'minecraft_username', true, 'Developer'
+setDefaultProperty 'extra_jvm_args', false, ''
+setDefaultProperty 'extra_tweak_classes', false, ''
+setDefaultProperty 'change_minecraft_sources', false, false
+setDefaultProperty 'publish_to_curseforge', true, false
+
+version = propertyString('mod_version')
+group = propertyString('root_package')
+
+base {
+    archivesName.set(propertyString('mod_id'))
+}
+
+tasks.named('decompressDecompiledSources').configure {
+    enabled = !propertyBool('change_minecraft_sources') || !layout.buildDirectory.dir('rfg/minecraft-src').get().asFile.exists()
+}
+
+// Gradle/RFG run on Java 21, but the Java compiler stays on 17 so Jabel can lower mod bytecode to Java 8.
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+        vendor.set(JvmVendorSpec.AZUL)
+    }
+    if (propertyBool('generate_sources_jar')) {
+        withSourcesJar()
+    }
+    if (propertyBool('generate_javadocs_jar')) {
+        withJavadocJar()
+    }
+}
+
+// Kotlin needs Java 8 game bytecode/runtime baseline.
+kotlin {
+    jvmToolchain(8)
+    compilerOptions.jvmTarget.set(JvmTarget.JVM_1_8)
+}
+
+tasks.withType(KotlinJvmCompile).configureEach {
+    compilerOptions.jvmTarget.set(JvmTarget.JVM_1_8)
+}
+
+minecraft {
+    mcVersion.set('1.12.2')
+
+    mcpMappingChannel.set(propertyString('mapping_channel'))
+    mcpMappingVersion.set(propertyString('mapping_version'))
+    useDependencyAccessTransformers.set(propertyBool('use_dependency_at_files'))
+
+    username.set(propertyString('minecraft_username'))
+    extraTweakClasses.addAll(propertyStringList('extra_tweak_classes'))
+
+    def args = ['-ea:' + group]
+    if (propertyBool('use_mixins')) {
+        args << '-Dmixin.checks.interfaces=true'
+        args << '-Dmixin.debug.export=true'
+    }
+    extraRunJvmArguments.addAll(args)
+    extraRunJvmArguments.addAll(propertyStringList('extra_jvm_args'))
+
+    // These third-party libraries contain classes that must not be remapped into the release jar.
+    groupsToExcludeFromAutoReobfMapping.addAll('com.diffplug', 'com.diffplug.durian', 'net.industrial-craft')
+
+    if (propertyBool('use_tags') && file('tags.properties').exists()) {
+        Properties props = new Properties().tap { it.load(file('tags.properties').newInputStream()); it }
+        if (!props.isEmpty()) {
+            injectedTags.set(props.collectEntries { k, v ->
+                def interpolated = interpolate(v)
+                if (interpolated == null || interpolated.isEmpty()) {
+                    throw new GradleException("Empty tag value found for key: $k")
+                }
+                [(k): interpolated]
+            })
+        }
+    }
+}
+
+repositories {
+    maven {
+        name 'CleanroomMC Maven'
+        url 'https://maven.cleanroommc.com'
+    }
+}
+
+dependencies {
+    if (propertyBool('use_modern_java_syntax')) {
+        annotationProcessor 'com.github.bsideup.jabel:jabel-javac-plugin:1.0.0'
+        // Work around Jabel issue #174.
+        annotationProcessor 'net.java.dev.jna:jna-platform:5.13.0'
+        compileOnly('com.github.bsideup.jabel:jabel-javac-plugin:1.0.0') {
+            transitive = false
+        }
+        // Allows jdk.unsupported classes such as sun.misc.Unsafe in the patched Minecraft runtime.
+        patchedMinecraft 'me.eigenraven.java8unsupported:java-8-unsupported-shim:1.0.0'
+        testAnnotationProcessor 'com.github.bsideup.jabel:jabel-javac-plugin:1.0.0'
+        testCompileOnly('com.github.bsideup.jabel:jabel-javac-plugin:1.0.0') {
+            transitive = false
+        }
+        testCompileOnly 'me.eigenraven.java8unsupported:java-8-unsupported-shim:1.0.0'
+    }
+
+    if (propertyBool('use_asset_mover')) {
+        implementation "com.cleanroommc:assetmover:${propertyString('asset_mover_version')}"
+    }
+
+    if (propertyBool('use_mixins')) {
+        String mixin = modUtils.enableMixins("zone.rong:mixinbooter:${propertyString('mixin_booter_version')}", propertyString('mixin_refmap'))
+        api(mixin) {
+            transitive = false
+        }
+        annotationProcessor 'org.ow2.asm:asm-debug-all:5.2'
+        annotationProcessor 'com.google.guava:guava:30.0-jre'
+        annotationProcessor 'com.google.code.gson:gson:2.8.9'
+        annotationProcessor(mixin) {
+            transitive = false
+        }
+    }
+
+    if (propertyBool('enable_junit_testing')) {
+        testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    }
+}
+
+apply from: 'gradle/scripts/dependencies.gradle'
+
+if (propertyBool('use_access_transformer')) {
+    def atFiles = propertyStringList('access_transformer_locations').collect { location ->
+        def atFile = file("src/main/resources/${location}")
+        if (!atFile.exists()) {
+            throw new GradleException("Access Transformer file [$atFile] does not exist!")
+        }
+        atFile
+    }
+    tasks.named('applyJST').configure {
+        accessTransformerFiles.from(atFiles)
+    }
+}
+
+processResources {
+    inputs.property 'mod_id', propertyString('mod_id')
+    inputs.property 'mod_name', propertyString('mod_name')
+    inputs.property 'mod_version', propertyString('mod_version')
+    inputs.property 'mcversion', minecraft.mcVersion.get()
+    inputs.property 'mod_description', propertyString('mod_description')
+    inputs.property 'mod_authors', propertyStringList('mod_authors', ',').join(', ')
+    inputs.property 'mod_credits', propertyString('mod_credits')
+    inputs.property 'mod_url', propertyString('mod_url')
+    inputs.property 'mod_update_json', propertyString('mod_update_json')
+    inputs.property 'mod_logo_path', propertyString('mod_logo_path')
+    inputs.property 'mixin_refmap', propertyString('mixin_refmap')
+
+    // Retain the existing mcmod.info placeholders while exposing the template-style names too.
+    filesMatching(['mcmod.info', 'pack.mcmeta']) {
+        expand(
+                'mod_id': propertyString('mod_id'),
+                'mod_name': propertyString('mod_name'),
+                'mod_version': propertyString('mod_version'),
+                'version': propertyString('mod_version'),
+                'mcversion': minecraft.mcVersion.get(),
+                'mod_description': propertyString('mod_description'),
+                'mod_authors': propertyStringList('mod_authors', ',').join(', '),
+                'mod_credits': propertyString('mod_credits'),
+                'mod_url': propertyString('mod_url'),
+                'mod_update_json': propertyString('mod_update_json'),
+                'mod_logo_path': propertyString('mod_logo_path'),
+                'mixin_refmap': propertyString('mixin_refmap')
+        )
+    }
+
+    if (propertyBool('use_access_transformer')) {
+        rename '(.+_at.cfg)', 'META-INF/$1'
+    }
+}
+
+jar {
+    manifest {
+        def attributeMap = [:]
+        if (propertyBool('is_coremod')) {
+            attributeMap['FMLCorePlugin'] = propertyString('coremod_plugin_class_name')
+            if (propertyBool('coremod_includes_mod')) {
+                attributeMap['FMLCorePluginContainsFMLMod'] = true
+                if (gradle.startParameter.taskNames.any { it in ['build', 'prepareObfModsFolder', 'runObfClient'] }) {
+                    attributeMap['ForceLoadAsMod'] = true
+                }
+            }
+        }
+        if (propertyBool('use_access_transformer')) {
+            attributeMap['FMLAT'] = propertyString('access_transformer_locations')
+        }
+
+        // Do not add MixinConfigs here: the early and late loaders select configs conditionally.
+        attributes(attributeMap)
+    }
+}
+
+idea {
+    module {
+        inheritOutputDirs = true
+    }
+    project {
+        settings {
+            runConfigurations {
+                '1. Run Client'(Gradle) {
+                    taskNames = ['runClient']
+                }
+                '2. Run Server'(Gradle) {
+                    taskNames = ['runServer']
+                }
+                '3. Run Obfuscated Client'(Gradle) {
+                    taskNames = ['runObfClient']
+                }
+                '4. Run Obfuscated Server'(Gradle) {
+                    taskNames = ['runObfServer']
+                }
+            }
+            compiler.javac {
+                afterEvaluate {
+                    javacAdditionalOptions = '-encoding utf8'
+                    moduleJavacAdditionalOptions = [
+                            (project.name + '.main'): tasks.compileJava.options.compilerArgs.collect { '"' + it + '"' }.join(' ')
+                    ]
+                }
+            }
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    if (propertyBool('use_modern_java_syntax')) {
+        if (name in ['compileMcLauncherJava', 'compilePatchedMcJava']) {
+            return
+        }
+        sourceCompatibility = '17'
+        targetCompatibility = '8'
+        options.release.set(8)
+        javaCompiler.set(javaToolchains.compilerFor {
+            languageVersion.set(JavaLanguageVersion.of(17))
+            vendor.set(JvmVendorSpec.AZUL)
+        })
+    }
+}
+
+tasks.withType(Javadoc).configureEach {
+    if (propertyBool('use_modern_java_syntax')) {
+        sourceCompatibility = '17'
+    }
+}
+
+tasks.named('injectTags', InjectTagsTask).configure {
+    onlyIf {
+        propertyBool('use_tags') && !tags.get().isEmpty()
+    }
+    outputClassName.set(propertyString('tag_class_name'))
+}
+
+tasks.register('cleanroomAfterSync') {
+    group 'cleanroom helpers'
+    dependsOn 'injectTags'
+}
+
+idea.project.settings {
+    taskTriggers {
+        afterSync 'cleanroomAfterSync'
+    }
+}
+
+tasks.named('prepareObfModsFolder').configure {
+    finalizedBy 'prioritizeCoremods'
+}
+
+tasks.register('prioritizeCoremods') {
+    dependsOn 'prepareObfModsFolder'
+    doLast {
+        fileTree('run/obfuscated').forEach {
+            if (it.isFile() && it.name =~ '(mixinbooter|configanytime)(-)([0-9])+\\.+([0-9])+(.jar)') {
+                it.renameTo(new File(it.parentFile, "!${it.name}"))
+            }
+        }
+    }
+}
+
+String parserChangelog() {
+    if (!file('CHANGELOG.md').exists()) {
+        throw new GradleException('publish_with_changelog is true, but CHANGELOG.md does not exist in the workspace!')
+    }
+    String parsedChangelog = changelog.renderItem(
+            changelog.get(propertyString('mod_version')).withHeader(false).withEmptySections(false),
+            Changelog.OutputType.MARKDOWN)
+    if (parsedChangelog.isEmpty()) {
+        throw new GradleException('publish_with_changelog is true, but the changelog for the latest version is empty!')
+    }
+    parsedChangelog
+}
+
+if (propertyBool('publish_to_curseforge')) {
+    assertProperty 'curseforge_project_id'
+    apply plugin: 'net.darkhax.curseforgegradle'
+    tasks.register('curseforge', TaskPublishCurseForge) {
+        disableVersionDetection()
+        group = 'publishing'
+        description = "Uploads CurseForge project ${propertyString('curseforge_project_id')}"
+    }
+}
+
+apply from: 'gradle/scripts/publishing.gradle'
+apply from: 'gradle/scripts/extra.gradle'

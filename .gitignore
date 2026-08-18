@@ -46,7 +46,11 @@ hs_err_pid*
 
 # For good measure...
 *.jks
-gradle.properties
+
+.vscode
 
 /libs/*
 .gradle
+.kotlin
+*.patch
+*.zip
