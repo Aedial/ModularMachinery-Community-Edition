@@ -1,6 +1,6 @@
 package hellfirepvp.modularmachinery.common.crafting.adapter.tc6;
 
-import crafttweaker.util.IEventHandler;
+import github.kasuminova.mmce.common.event.EventHandler;
 import github.kasuminova.mmce.common.event.recipe.RecipeEvent;
 import github.kasuminova.mmce.common.itemtype.ChancedIngredientStack;
 import hellfirepvp.modularmachinery.common.crafting.MachineRecipe;
@@ -36,7 +36,7 @@ public class AdapterTC6InfusionMatrix extends RecipeAdapter {
 
     @Nonnull
     @Override
-    public Collection<MachineRecipe> createRecipesFor(ResourceLocation owningMachineName, List<RecipeModifier> modifiers, List<ComponentRequirement<?, ?>> additionalRequirements, Map<Class<?>, List<IEventHandler<RecipeEvent>>> eventHandlers, List<String> recipeTooltips) {
+    public Collection<MachineRecipe> createRecipesFor(ResourceLocation owningMachineName, List<RecipeModifier> modifiers, List<ComponentRequirement<?, ?>> additionalRequirements, Map<Class<?>, List<EventHandler<RecipeEvent>>> eventHandlers, List<String> recipeTooltips) {
         List<MachineRecipe> machineRecipeList = new ArrayList<>();
 
         ThaumcraftApi.getCraftingRecipes().forEach((recipeName, tcRecipe) -> {

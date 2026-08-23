@@ -6,6 +6,7 @@ import crafttweaker.api.world.IBlockPos;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.fml.common.Optional;
 import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenGetter;
 import stanhebben.zenscript.annotations.ZenSetter;
@@ -47,6 +48,7 @@ public class SmartInterfaceData {
      * 返回此数据对应控制器所在的位置。
      */
     @ZenGetter("pos")
+    @Optional.Method(modid = "crafttweaker")
     public IBlockPos getIPos() {
         return CraftTweakerMC.getIBlockPos(pos);
     }

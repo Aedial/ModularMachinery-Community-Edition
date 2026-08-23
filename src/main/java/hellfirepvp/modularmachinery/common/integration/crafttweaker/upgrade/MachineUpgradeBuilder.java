@@ -328,6 +328,6 @@ public class MachineUpgradeBuilder {
     }
 
     private <E extends MachineEvent> void addEventHandler(Class<E> eventClass, UpgradeEventHandlerCT handler) {
-        machineUpgrade.addEventHandler(eventClass, handler);
+        machineUpgrade.addEventHandler(eventClass, handler::handle);
     }
 }

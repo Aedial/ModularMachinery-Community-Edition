@@ -1,7 +1,7 @@
 package hellfirepvp.modularmachinery.common.crafting.adapter.te5;
 
 import cofh.thermalexpansion.util.managers.machine.InsolatorManager;
-import crafttweaker.util.IEventHandler;
+import github.kasuminova.mmce.common.event.EventHandler;
 import github.kasuminova.mmce.common.event.recipe.RecipeEvent;
 import github.kasuminova.mmce.common.util.HashedItemStack;
 import hellfirepvp.modularmachinery.common.crafting.MachineRecipe;
@@ -49,7 +49,7 @@ public class InsolatorRecipeAdapter extends RecipeAdapter {
     public Collection<MachineRecipe> createRecipesFor(final ResourceLocation owningMachineName,
                                                       final List<RecipeModifier> modifiers,
                                                       final List<ComponentRequirement<?, ?>> additionalRequirements,
-                                                      final Map<Class<?>, List<IEventHandler<RecipeEvent>>> eventHandlers,
+                                                      final Map<Class<?>, List<EventHandler<RecipeEvent>>> eventHandlers,
                                                       final List<String> recipeTooltips) {
         List<MachineRecipe> recipes = new ArrayList<>();
         InsolatorManager.InsolatorRecipe[] insolatorRecipes = InsolatorManager.getRecipeList();

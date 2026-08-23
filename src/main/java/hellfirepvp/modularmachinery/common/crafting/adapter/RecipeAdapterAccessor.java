@@ -15,12 +15,11 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import crafttweaker.util.IEventHandler;
+import github.kasuminova.mmce.common.event.EventHandler;
 import github.kasuminova.mmce.common.event.recipe.RecipeEvent;
 import hellfirepvp.modularmachinery.ModularMachinery;
 import hellfirepvp.modularmachinery.common.crafting.MachineRecipe;
 import hellfirepvp.modularmachinery.common.crafting.helper.ComponentRequirement;
-import hellfirepvp.modularmachinery.common.integration.crafttweaker.RecipeAdapterBuilder;
 import hellfirepvp.modularmachinery.common.modifier.RecipeModifier;
 import net.minecraft.util.ResourceLocation;
 
@@ -42,10 +41,10 @@ import java.util.Map;
 public class RecipeAdapterAccessor {
 
     private final ResourceLocation owningMachine, adapterKey;
-    private final List<RecipeModifier>                            modifiers;
-    private final List<ComponentRequirement<?, ?>>                additionalRecipeRequirements;
-    private final Map<Class<?>, List<IEventHandler<RecipeEvent>>> recipeEventHandlers;
-    private final List<String>                                    tooltipList;
+    private final List<RecipeModifier>                           modifiers;
+    private final List<ComponentRequirement<?, ?>>               additionalRecipeRequirements;
+    private final Map<Class<?>, List<EventHandler<RecipeEvent>>> recipeEventHandlers;
+    private final List<String>                                   tooltipList;
 
     private final List<MachineRecipe> cacheLoaded = new LinkedList<>();
 
@@ -58,7 +57,7 @@ public class RecipeAdapterAccessor {
         this.tooltipList = new ArrayList<>();
     }
 
-    public RecipeAdapterAccessor(RecipeAdapterBuilder builder) {
+    public RecipeAdapterAccessor(RecipeAdapterDefinition builder) {
         this.owningMachine = builder.getAssociatedMachineName();
         this.adapterKey = builder.getAdapterParentMachineName();
         this.modifiers = builder.getModifiers();
@@ -84,9 +83,9 @@ public class RecipeAdapterAccessor {
     }
 
     @SuppressWarnings("unchecked")
-    public <H extends RecipeEvent> void addRecipeEventHandler(Class<?> hClass, IEventHandler<H> handler) {
+    public <H extends RecipeEvent> void addRecipeEventHandler(Class<?> hClass, EventHandler<H> handler) {
         recipeEventHandlers.putIfAbsent(hClass, new ArrayList<>());
-        recipeEventHandlers.get(hClass).add((IEventHandler<RecipeEvent>) handler);
+        recipeEventHandlers.get(hClass).add((EventHandler<RecipeEvent>) handler);
     }
 
     public void addTooltip(String tooltip) {

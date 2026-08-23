@@ -18,6 +18,7 @@ import crafttweaker.api.liquid.ILiquidStack;
 import crafttweaker.api.minecraft.CraftTweakerMC;
 import crafttweaker.api.oredict.IOreDictEntry;
 import crafttweaker.util.IEventHandler;
+import github.kasuminova.mmce.common.event.EventHandler;
 import github.kasuminova.mmce.common.event.Phase;
 import github.kasuminova.mmce.common.event.recipe.FactoryRecipeFailureEvent;
 import github.kasuminova.mmce.common.event.recipe.FactoryRecipeFinishEvent;
@@ -85,10 +86,10 @@ public class RecipePrimer implements PreparedRecipe {
     private final int tickTime, priority;
     private final boolean doesVoidPerTick;
 
-    private final List<ComponentRequirement<?, ?>>                components           = new LinkedList<>();
-    private final List<Action>                                    needAfterInitActions = new LinkedList<>();
-    private final List<String>                                    toolTipList          = new ArrayList<>();
-    private final Map<Class<?>, List<IEventHandler<RecipeEvent>>> recipeEventHandlers  = new HashMap<>();
+    private final List<ComponentRequirement<?, ?>>               components           = new LinkedList<>();
+    private final List<Action>                                   needAfterInitActions = new LinkedList<>();
+    private final List<String>                                   toolTipList          = new ArrayList<>();
+    private final Map<Class<?>, List<EventHandler<RecipeEvent>>> recipeEventHandlers  = new HashMap<>();
 
     private boolean                    parallelized  = Config.recipeParallelizeEnabledByDefault;
     private boolean                    loadJEI       = true;
@@ -405,7 +406,7 @@ public class RecipePrimer implements PreparedRecipe {
 
     private <H extends RecipeEvent> void addRecipeEventHandler(Class<H> hClass, IEventHandler<H> handler) {
         recipeEventHandlers.putIfAbsent(hClass, new ArrayList<>());
-        recipeEventHandlers.get(hClass).add((IEventHandler<RecipeEvent>) handler);
+        recipeEventHandlers.get(hClass).add(event -> handler.handle((H) event));
     }
 
     //----------------------------------------------------------------------------------------------
@@ -934,7 +935,7 @@ public class RecipePrimer implements PreparedRecipe {
     }
 
     @Override
-    public Map<Class<?>, List<IEventHandler<RecipeEvent>>> getRecipeEventHandlers() {
+    public Map<Class<?>, List<EventHandler<RecipeEvent>>> getRecipeEventHandlers() {
         return recipeEventHandlers;
     }
 

@@ -21,6 +21,7 @@ import hellfirepvp.modularmachinery.common.tiles.base.TileMultiblockMachineContr
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.common.Optional;
 import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenGetter;
 import stanhebben.zenscript.annotations.ZenSetter;
@@ -210,11 +211,13 @@ public class ActiveMachineRecipe {
     }
 
     @ZenGetter("data")
+    @Optional.Method(modid = "crafttweaker")
     public IData getData() {
         return CraftTweakerMC.getIDataModifyable(data);
     }
 
     @ZenSetter("data")
+    @Optional.Method(modid = "crafttweaker")
     public void setData(IData data) {
         this.data = CraftTweakerMC.getNBTCompound(data);
     }

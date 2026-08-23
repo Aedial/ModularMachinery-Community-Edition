@@ -348,7 +348,7 @@ public class MachineBuilder {
      */
     @ZenMethod
     public MachineBuilder addStructureFormedHandler(IEventHandler<MachineStructureFormedEvent> function) {
-        machine.addMachineEventHandler(MachineStructureFormedEvent.class, function);
+        machine.addMachineEventHandler(MachineStructureFormedEvent.class, function::handle);
         return this;
     }
 
@@ -357,7 +357,7 @@ public class MachineBuilder {
      */
     @ZenMethod
     public MachineBuilder addStructureUpdateHandler(IEventHandler<MachineStructureUpdateEvent> function) {
-        machine.addMachineEventHandler(MachineStructureUpdateEvent.class, function);
+        machine.addMachineEventHandler(MachineStructureUpdateEvent.class, function::handle);
         return this;
     }
 
@@ -366,7 +366,7 @@ public class MachineBuilder {
      */
     @ZenMethod
     public MachineBuilder addTickHandler(IEventHandler<MachineTickEvent> function) {
-        machine.addMachineEventHandler(MachineTickEvent.class, function);
+        machine.addMachineEventHandler(MachineTickEvent.class, function::handle);
         return this;
     }
 
@@ -378,7 +378,7 @@ public class MachineBuilder {
         if (FMLCommonHandler.instance().getSide().isServer()) {
             return this;
         }
-        machine.addMachineEventHandler(ControllerGUIRenderEvent.class, function);
+        machine.addMachineEventHandler(ControllerGUIRenderEvent.class, function::handle);
         return this;
     }
 
@@ -391,7 +391,7 @@ public class MachineBuilder {
         if (FMLCommonHandler.instance().getSide().isServer()) {
             return this;
         }
-        machine.addMachineEventHandler(ControllerModelAnimationEvent.class, function);
+        machine.addMachineEventHandler(ControllerModelAnimationEvent.class, function::handle);
         return this;
     }
 
@@ -404,7 +404,7 @@ public class MachineBuilder {
         if (FMLCommonHandler.instance().getSide().isServer()) {
             return this;
         }
-        machine.addMachineEventHandler(ControllerModelGetEvent.class, function);
+        machine.addMachineEventHandler(ControllerModelGetEvent.class, function::handle);
         return this;
     }
 
@@ -413,7 +413,7 @@ public class MachineBuilder {
      */
     @ZenMethod
     public MachineBuilder addSmartInterfaceUpdateHandler(IEventHandler<SmartInterfaceUpdateEvent> function) {
-        machine.addMachineEventHandler(SmartInterfaceUpdateEvent.class, function);
+        machine.addMachineEventHandler(SmartInterfaceUpdateEvent.class, function::handle);
         return this;
     }
 

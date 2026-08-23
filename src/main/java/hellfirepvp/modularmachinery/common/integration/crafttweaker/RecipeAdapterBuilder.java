@@ -4,6 +4,7 @@ import crafttweaker.CraftTweakerAPI;
 import crafttweaker.annotations.ZenRegister;
 import hellfirepvp.modularmachinery.ModularMachinery;
 import hellfirepvp.modularmachinery.common.crafting.RecipeRegistry;
+import hellfirepvp.modularmachinery.common.crafting.adapter.RecipeAdapterDefinition;
 import hellfirepvp.modularmachinery.common.modifier.RecipeModifier;
 import net.minecraft.util.ResourceLocation;
 import stanhebben.zenscript.annotations.ZenClass;
@@ -14,7 +15,7 @@ import java.util.List;
 
 @ZenRegister
 @ZenClass("mods.modularmachinery.RecipeAdapterBuilder")
-public class RecipeAdapterBuilder extends RecipePrimer {
+public class RecipeAdapterBuilder extends RecipePrimer implements RecipeAdapterDefinition {
     protected final List<RecipeModifier> modifiers = new LinkedList<>();
     protected final ResourceLocation     parentMachineName;
 

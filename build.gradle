@@ -81,6 +81,26 @@ tasks.withType(KotlinJvmCompile).configureEach {
     compilerOptions.jvmTarget.set(JvmTarget.JVM_1_8)
 }
 
+// Optional integrations need to compile and be present in development runs, but must not be
+// published as runtime requirements of Modular Machinery.
+configurations {
+    def runtimeOnlyNonPublishable = create('runtimeOnlyNonPublishable') {
+        description = 'Runtime-only dependencies that are not published alongside the jar'
+        canBeConsumed = false
+        canBeResolved = false
+    }
+    def devOnlyNonPublishable = create('devOnlyNonPublishable') {
+        description = 'Compile-time and development-runtime dependencies that are not published alongside the jar'
+        canBeConsumed = false
+        canBeResolved = false
+    }
+
+    compileOnly.extendsFrom(devOnlyNonPublishable)
+    runtimeOnlyNonPublishable.extendsFrom(devOnlyNonPublishable)
+    runtimeClasspath.extendsFrom(runtimeOnlyNonPublishable)
+    testRuntimeClasspath.extendsFrom(runtimeOnlyNonPublishable)
+}
+
 minecraft {
     mcVersion.set('1.12.2')
 

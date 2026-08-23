@@ -8,7 +8,7 @@
 
 package hellfirepvp.modularmachinery.common.crafting.adapter;
 
-import crafttweaker.util.IEventHandler;
+import github.kasuminova.mmce.common.event.EventHandler;
 import github.kasuminova.mmce.common.event.recipe.RecipeEvent;
 import hellfirepvp.modularmachinery.ModularMachinery;
 import hellfirepvp.modularmachinery.common.crafting.MachineRecipe;
@@ -44,7 +44,7 @@ public class DynamicMachineRecipeAdapter extends RecipeAdapter {
     public Collection<MachineRecipe> createRecipesFor(ResourceLocation owningMachineName,
                                                       List<RecipeModifier> modifiers,
                                                       List<ComponentRequirement<?, ?>> additionalRequirements,
-                                                      Map<Class<?>, List<IEventHandler<RecipeEvent>>> eventHandlers,
+                                                      Map<Class<?>, List<EventHandler<RecipeEvent>>> eventHandlers,
                                                       List<String> recipeTooltips) {
         String newIdentifier = owningMachineName.getNamespace() + "." + owningMachineName.getPath();
 

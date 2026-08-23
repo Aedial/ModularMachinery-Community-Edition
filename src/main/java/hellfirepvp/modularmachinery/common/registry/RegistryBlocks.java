@@ -103,6 +103,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.io.FileUtils;
@@ -400,10 +401,9 @@ public class RegistryBlocks {
         }
 
         List<DynamicMachine> waitForLoadMachines = MachineRegistry.getWaitForLoadMachines();
-        for (MachineBuilder builder : MachineBuilder.PRE_LOAD_MACHINES.values()) {
-            waitForLoadMachines.add(builder.getMachine());
+        if (Mods.CRAFTTWEAKER.isPresent()) {
+            addCraftTweakerPreloadMachines(waitForLoadMachines);
         }
-        MachineBuilder.PRE_LOAD_MACHINES.clear();
 
         if (Config.mocCompatibleMode) {
             for (DynamicMachine machine : waitForLoadMachines) {
@@ -438,6 +438,14 @@ public class RegistryBlocks {
             ItemBlockController ctrlBlockItem = (ItemBlockController) new ItemBlockController(ctrlBlock).setRegistryName(Objects.requireNonNull(ctrlBlock.getRegistryName()));
             prepareItemBlockRegisterWithCustomName(ctrlBlockItem);
         }
+    }
+
+    @Optional.Method(modid = "crafttweaker")
+    private static void addCraftTweakerPreloadMachines(List<DynamicMachine> machines) {
+        for (MachineBuilder builder : MachineBuilder.PRE_LOAD_MACHINES.values()) {
+            machines.add(builder.getMachine());
+        }
+        MachineBuilder.PRE_LOAD_MACHINES.clear();
     }
 
     private static void registerBlockModels() {

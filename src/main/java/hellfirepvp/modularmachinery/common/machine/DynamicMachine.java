@@ -15,7 +15,7 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import crafttweaker.util.IEventHandler;
+import github.kasuminova.mmce.common.event.EventHandler;
 import github.kasuminova.mmce.common.concurrent.RecipeCraftingContextPool;
 import github.kasuminova.mmce.common.event.machine.MachineEvent;
 import github.kasuminova.mmce.common.util.BlockPos2ValueMap;
@@ -66,7 +66,7 @@ public class DynamicMachine extends AbstractMachine {
     private final Map<BlockPos, List<SingleBlockModifierReplacement>> modifiers           = new BlockPos2ValueMap<>();
     private final List<MultiBlockModifierReplacement>                 multiBlockModifiers = new ArrayList<>();
 
-    private final Map<Class<?>, List<IEventHandler<MachineEvent>>> machineEventHandlers = new HashMap<>();
+    private final Map<Class<?>, List<EventHandler<MachineEvent>>> machineEventHandlers = new HashMap<>();
 
     private final TaggedPositionBlockArray    pattern         = new TaggedPositionBlockArray();
     private final Map<String, DynamicPattern> dynamicPatterns = new HashMap<>();
@@ -139,17 +139,17 @@ public class DynamicMachine extends AbstractMachine {
         return filtered;
     }
 
-    public <H extends MachineEvent> void addMachineEventHandler(Class<H> hClass, IEventHandler<H> handler) {
+    public <H extends MachineEvent> void addMachineEventHandler(Class<H> hClass, EventHandler<H> handler) {
         machineEventHandlers.putIfAbsent(hClass, new ArrayList<>());
-        machineEventHandlers.get(hClass).add((IEventHandler<MachineEvent>) handler);
+        machineEventHandlers.get(hClass).add((EventHandler<MachineEvent>) handler);
     }
 
     @Nullable
-    public List<IEventHandler<MachineEvent>> getMachineEventHandlers(Class<?> handlerClass) {
+    public List<EventHandler<MachineEvent>> getMachineEventHandlers(Class<?> handlerClass) {
         return machineEventHandlers.get(handlerClass);
     }
 
-    public Map<Class<?>, List<IEventHandler<MachineEvent>>> getMachineEventHandlers() {
+    public Map<Class<?>, List<EventHandler<MachineEvent>>> getMachineEventHandlers() {
         return machineEventHandlers;
     }
 

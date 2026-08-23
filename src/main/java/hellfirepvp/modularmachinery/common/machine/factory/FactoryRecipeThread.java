@@ -1,6 +1,5 @@
 package hellfirepvp.modularmachinery.common.machine.factory;
 
-import crafttweaker.CraftTweakerAPI;
 import crafttweaker.annotations.ZenRegister;
 import github.kasuminova.mmce.common.concurrent.FactoryRecipeSearchTask;
 import github.kasuminova.mmce.common.util.concurrent.Action;
@@ -253,7 +252,7 @@ public class FactoryRecipeThread extends RecipeThread {
             if (recipe != null) {
                 addRecipe(recipe);
             } else {
-                CraftTweakerAPI.logError("[ModularMachinery] Cloud not found recipe by name " + recipeName + "!");
+                ModularMachinery.log.error("[ModularMachinery] Could not find recipe by name {}!", recipeName);
             }
         } else {
             WAIT_FOR_ADD.add(() -> {
@@ -261,7 +260,7 @@ public class FactoryRecipeThread extends RecipeThread {
                 if (recipe != null) {
                     addRecipe(recipe);
                 } else {
-                    CraftTweakerAPI.logError("[ModularMachinery] Cloud not found recipe by name " + recipeName + "!");
+                    ModularMachinery.log.error("[ModularMachinery] Could not find recipe by name {}!", recipeName);
                 }
             });
         }

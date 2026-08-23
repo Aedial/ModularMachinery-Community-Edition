@@ -1,7 +1,7 @@
 package github.kasuminova.mmce.common.event.recipe;
 
 import crafttweaker.annotations.ZenRegister;
-import crafttweaker.util.IEventHandler;
+import github.kasuminova.mmce.common.event.EventHandler;
 import github.kasuminova.mmce.common.event.machine.MachineEvent;
 import hellfirepvp.modularmachinery.common.crafting.ActiveMachineRecipe;
 import hellfirepvp.modularmachinery.common.crafting.helper.RecipeCraftingContext;
@@ -49,11 +49,11 @@ public class RecipeEvent extends MachineEvent {
         if (isCanceled()) {
             return;
         }
-        List<IEventHandler<RecipeEvent>> handlers = activeRecipe.getRecipe().getRecipeEventHandlers().get(getClass());
+        List<EventHandler<RecipeEvent>> handlers = activeRecipe.getRecipe().getRecipeEventHandlers().get(getClass());
         if (handlers == null) {
             return;
         }
-        for (IEventHandler<RecipeEvent> handler : handlers) {
+        for (EventHandler<RecipeEvent> handler : handlers) {
             handler.handle(this);
             if (isCanceled()) {
                 break;

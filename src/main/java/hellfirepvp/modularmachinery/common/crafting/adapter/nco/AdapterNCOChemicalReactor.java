@@ -1,6 +1,6 @@
 package hellfirepvp.modularmachinery.common.crafting.adapter.nco;
 
-import crafttweaker.util.IEventHandler;
+import github.kasuminova.mmce.common.event.EventHandler;
 import github.kasuminova.mmce.common.event.recipe.RecipeEvent;
 import hellfirepvp.modularmachinery.common.crafting.MachineRecipe;
 import hellfirepvp.modularmachinery.common.crafting.helper.ComponentRequirement;
@@ -31,7 +31,7 @@ public class AdapterNCOChemicalReactor extends AdapterNCOMachine {
 
     @Nonnull
     @Override
-    public Collection<MachineRecipe> createRecipesFor(ResourceLocation owningMachineName, List<RecipeModifier> modifiers, List<ComponentRequirement<?, ?>> additionalRequirements, Map<Class<?>, List<IEventHandler<RecipeEvent>>> eventHandlers, List<String> recipeTooltips) {
+    public Collection<MachineRecipe> createRecipesFor(ResourceLocation owningMachineName, List<RecipeModifier> modifiers, List<ComponentRequirement<?, ?>> additionalRequirements, Map<Class<?>, List<EventHandler<RecipeEvent>>> eventHandlers, List<String> recipeTooltips) {
         List<BasicRecipe> recipeList = NCRecipes.chemical_reactor.getRecipeList();
         List<MachineRecipe> machineRecipeList = new ArrayList<>(recipeList.size());
 

@@ -87,6 +87,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.common.network.IGuiHandler;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import org.jetbrains.annotations.NotNull;
@@ -140,7 +141,7 @@ public class CommonProxy implements IGuiHandler {
         NetworkRegistry.INSTANCE.registerGuiHandler(ModularMachinery.MODID, this);
 
         if (Mods.CRAFTTWEAKER.isPresent()) {
-            MinecraftForge.EVENT_BUS.register(new ModIntegrationCrafttweaker());
+            registerCraftTweakerIntegration();
         }
         if (Mods.FLUX_NETWORKS.isPresent() && Config.enableFluxNetworksIntegration) {
             ModIntegrationFluxNetworks.preInit();
@@ -191,10 +192,9 @@ public class CommonProxy implements IGuiHandler {
         }
 
         MachineRegistry.registerMachines(MachineRegistry.loadMachines(null));
-        MachineRegistry.registerMachines(MachineBuilder.WAIT_FOR_LOAD);
-
-        MachineModifier.loadAll();
-        MMEvents.registryAll();
+        if (Mods.CRAFTTWEAKER.isPresent()) {
+            completeCraftTweakerPostInit();
+        }
         RecipeAdapterRegistry.registerDynamicMachineAdapters();
 
         RecipeRegistry.getRegistry().loadRecipeRegistry(null, true);
@@ -202,6 +202,18 @@ public class CommonProxy implements IGuiHandler {
             action.doAction();
         }
         FactoryRecipeThread.WAIT_FOR_ADD.clear();
+    }
+
+    @Optional.Method(modid = "crafttweaker")
+    private void registerCraftTweakerIntegration() {
+        MinecraftForge.EVENT_BUS.register(new ModIntegrationCrafttweaker());
+    }
+
+    @Optional.Method(modid = "crafttweaker")
+    private void completeCraftTweakerPostInit() {
+        MachineRegistry.registerMachines(MachineBuilder.WAIT_FOR_LOAD);
+        MachineModifier.loadAll();
+        MMEvents.registryAll();
     }
 
     public void loadComplete() {

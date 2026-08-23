@@ -15,7 +15,7 @@ import hellfirepvp.modularmachinery.ModularMachinery;
 import hellfirepvp.modularmachinery.common.crafting.adapter.RecipeAdapterAccessor;
 import hellfirepvp.modularmachinery.common.crafting.command.RecipeRunnableCommand;
 import hellfirepvp.modularmachinery.common.crafting.helper.ComponentRequirement;
-import hellfirepvp.modularmachinery.common.integration.crafttweaker.RecipeAdapterBuilder;
+import hellfirepvp.modularmachinery.common.crafting.adapter.RecipeAdapterDefinition;
 import hellfirepvp.modularmachinery.common.modifier.RecipeModifier;
 import net.minecraft.util.JsonUtils;
 
@@ -103,7 +103,7 @@ public class RecipeLoader {
         return loadedRecipes;
     }
 
-    public static List<MachineRecipe> loadAdapterRecipes(List<File> adapterCandidates, List<RecipeAdapterBuilder> adapterBuilders) {
+    public static List<MachineRecipe> loadAdapterRecipes(List<File> adapterCandidates, List<RecipeAdapterDefinition> adapterBuilders) {
         List<MachineRecipe> loadedRecipes = new LinkedList<>();
         for (File f : adapterCandidates) {
             try (InputStreamReader isr = new InputStreamReader(Files.newInputStream(f.toPath()), StandardCharsets.UTF_8)) {
@@ -119,7 +119,7 @@ public class RecipeLoader {
                 failedAttempts.put(f.getPath(), exc);
             }
         }
-        for (RecipeAdapterBuilder builder : adapterBuilders) {
+        for (RecipeAdapterDefinition builder : adapterBuilders) {
             RecipeAdapterAccessor accessor = new RecipeAdapterAccessor(builder);
             Collection<MachineRecipe> recipes = accessor.loadRecipesForAdapter();
             if (recipes.isEmpty()) {

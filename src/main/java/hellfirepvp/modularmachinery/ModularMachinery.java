@@ -37,6 +37,7 @@ import net.minecraft.launchwrapper.Launch;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
@@ -58,7 +59,7 @@ import org.apache.logging.log4j.Logger;
  */
 @Mod(modid = ModularMachinery.MODID, name = ModularMachinery.NAME, version = ModularMachinery.VERSION,
         dependencies = "required-after:forge@[14.21.0.2371,);" +
-                "required-after:crafttweaker@[4.0.4,);" +
+                "after:crafttweaker@[4.0.4,);" +
                 "after:zenutils@[1.12.8,);" +
                 "after:jei@[4.13.1.222,);" +
                 "after:gregtech@[2.7.4-beta,);" +
@@ -163,9 +164,14 @@ public class ModularMachinery {
         event.registerServerCommand(new CommandGetBluePrint());
         event.registerServerCommand(new CommandPerformanceReport());
 
-        if (Mods.ZEN_UTILS.isPresent()) {
-            event.registerServerCommand(new CommandCTReload());
+        if (Mods.CRAFTTWEAKER.isPresent() && Mods.ZEN_UTILS.isPresent()) {
+            registerCraftTweakerReloadCommand(event);
         }
+    }
+
+    @Optional.Method(modid = "crafttweaker")
+    private void registerCraftTweakerReloadCommand(FMLServerStartingEvent event) {
+        event.registerServerCommand(new CommandCTReload());
     }
 
 }

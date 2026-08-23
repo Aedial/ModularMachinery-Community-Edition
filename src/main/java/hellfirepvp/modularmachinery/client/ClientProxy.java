@@ -83,6 +83,7 @@ import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -235,12 +236,17 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void postInit() {
         super.postInit();
-        if (Mods.ZEN_UTILS.isPresent()) {
-            ClientCommandHandler.instance.registerCommand(new CommandCTReloadClient());
+        if (Mods.CRAFTTWEAKER.isPresent() && Mods.ZEN_UTILS.isPresent()) {
+            registerCraftTweakerReloadCommand();
         }
         if (Mods.GECKOLIB.isPresent()) {
             GeoModelExternalLoader.INSTANCE.onReload();
         }
+    }
+
+    @Optional.Method(modid = "crafttweaker")
+    private void registerCraftTweakerReloadCommand() {
+        ClientCommandHandler.instance.registerCommand(new CommandCTReloadClient());
     }
 
     @Override

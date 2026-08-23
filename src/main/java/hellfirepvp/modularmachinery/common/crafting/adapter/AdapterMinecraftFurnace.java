@@ -8,7 +8,7 @@
 
 package hellfirepvp.modularmachinery.common.crafting.adapter;
 
-import crafttweaker.util.IEventHandler;
+import github.kasuminova.mmce.common.event.EventHandler;
 import github.kasuminova.mmce.common.event.Phase;
 import github.kasuminova.mmce.common.event.recipe.RecipeCheckEvent;
 import github.kasuminova.mmce.common.event.recipe.RecipeEvent;
@@ -48,7 +48,7 @@ public class AdapterMinecraftFurnace extends RecipeAdapter {
     public Collection<MachineRecipe> createRecipesFor(ResourceLocation owningMachineName,
                                                       List<RecipeModifier> modifiers,
                                                       List<ComponentRequirement<?, ?>> additionalRequirements,
-                                                      Map<Class<?>, List<IEventHandler<RecipeEvent>>> eventHandlers,
+                                                      Map<Class<?>, List<EventHandler<RecipeEvent>>> eventHandlers,
                                                       List<String> recipeTooltips) {
         FurnaceRecipes furnaceRecipes = FurnaceRecipes.instance();
         Map<ItemStack, ItemStack> inputOutputMap = furnaceRecipes.getSmeltingList();
@@ -64,7 +64,7 @@ public class AdapterMinecraftFurnace extends RecipeAdapter {
                 new ResourceLocation("minecraft", "smelting_" + incId + "_" + input + "_" + output),
                 owningMachineName,
                 tickTime, 0, false);
-            recipe.addRecipeEventHandler(RecipeCheckEvent.class, (IEventHandler<RecipeCheckEvent>) event -> {
+            recipe.addRecipeEventHandler(RecipeCheckEvent.class, (EventHandler<RecipeCheckEvent>) event -> {
                 if (event.phase == Phase.START) {
                     event.getActiveRecipe().getDataCompound().setFloat("experience", experience);
                 }

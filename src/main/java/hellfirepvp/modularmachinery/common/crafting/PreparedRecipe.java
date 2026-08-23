@@ -8,7 +8,7 @@
 
 package hellfirepvp.modularmachinery.common.crafting;
 
-import crafttweaker.util.IEventHandler;
+import github.kasuminova.mmce.common.event.EventHandler;
 import github.kasuminova.mmce.common.event.recipe.RecipeEvent;
 import hellfirepvp.modularmachinery.common.crafting.helper.ComponentRequirement;
 import net.minecraft.util.ResourceLocation;
@@ -43,7 +43,7 @@ public interface PreparedRecipe {
 
     List<ComponentRequirement<?, ?>> getComponents();
 
-    Map<Class<?>, List<IEventHandler<RecipeEvent>>> getRecipeEventHandlers();
+    Map<Class<?>, List<EventHandler<RecipeEvent>>> getRecipeEventHandlers();
 
     List<String> getTooltipList();
 

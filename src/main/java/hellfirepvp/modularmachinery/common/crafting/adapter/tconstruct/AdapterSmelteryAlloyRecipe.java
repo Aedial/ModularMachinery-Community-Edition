@@ -1,6 +1,6 @@
 package hellfirepvp.modularmachinery.common.crafting.adapter.tconstruct;
 
-import crafttweaker.util.IEventHandler;
+import github.kasuminova.mmce.common.event.EventHandler;
 import github.kasuminova.mmce.common.event.recipe.RecipeEvent;
 import hellfirepvp.modularmachinery.common.crafting.MachineRecipe;
 import hellfirepvp.modularmachinery.common.crafting.adapter.RecipeAdapter;
@@ -29,7 +29,7 @@ public class AdapterSmelteryAlloyRecipe extends RecipeAdapter {
 
     @Nonnull
     @Override
-    public Collection<MachineRecipe> createRecipesFor(ResourceLocation owningMachineName, List<RecipeModifier> modifiers, List<ComponentRequirement<?, ?>> additionalRequirements, Map<Class<?>, List<IEventHandler<RecipeEvent>>> eventHandlers, List<String> recipeTooltips) {
+    public Collection<MachineRecipe> createRecipesFor(ResourceLocation owningMachineName, List<RecipeModifier> modifiers, List<ComponentRequirement<?, ?>> additionalRequirements, Map<Class<?>, List<EventHandler<RecipeEvent>>> eventHandlers, List<String> recipeTooltips) {
         List<AlloyRecipe> alloyRecipes = TinkerRegistry.getAlloys();
         List<MachineRecipe> machineRecipeList = new ArrayList<>(alloyRecipes.size());
 

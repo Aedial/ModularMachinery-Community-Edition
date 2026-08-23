@@ -7,6 +7,7 @@ import crafttweaker.api.world.IWorld;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.Optional;
 import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenMethod;
 
@@ -22,6 +23,7 @@ public class MachineController {
      * @return 如果无控制器则返回 null，否则返回 IMachineController 实例。
      */
     @ZenMethod
+    @Optional.Method(modid = "crafttweaker")
     public static IMachineController getControllerAt(IWorld worldCT, IBlockPos posCT) {
         World world = CraftTweakerMC.getWorld(worldCT);
         BlockPos pos = CraftTweakerMC.getBlockPos(posCT);
@@ -40,6 +42,7 @@ public class MachineController {
      * @return 如果无控制器则返回 null，否则返回 IMachineController 实例。
      */
     @ZenMethod
+    @Optional.Method(modid = "crafttweaker")
     public static IMachineController getControllerAt(IWorld worldCT, int x, int y, int z) {
         World world = CraftTweakerMC.getWorld(worldCT);
         BlockPos pos = new BlockPos(x, y, z);

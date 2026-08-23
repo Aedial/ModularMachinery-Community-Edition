@@ -1,6 +1,6 @@
 package hellfirepvp.modularmachinery.common.crafting.adapter.tconstruct;
 
-import crafttweaker.util.IEventHandler;
+import github.kasuminova.mmce.common.event.EventHandler;
 import github.kasuminova.mmce.common.event.Phase;
 import github.kasuminova.mmce.common.event.recipe.RecipeCheckEvent;
 import github.kasuminova.mmce.common.event.recipe.RecipeEvent;
@@ -34,7 +34,7 @@ public class AdapterSmelteryMeltingRecipe extends RecipeAdapter {
 
     @Nonnull
     @Override
-    public Collection<MachineRecipe> createRecipesFor(ResourceLocation owningMachineName, List<RecipeModifier> modifiers, List<ComponentRequirement<?, ?>> additionalRequirements, Map<Class<?>, List<IEventHandler<RecipeEvent>>> eventHandlers, List<String> recipeTooltips) {
+    public Collection<MachineRecipe> createRecipesFor(ResourceLocation owningMachineName, List<RecipeModifier> modifiers, List<ComponentRequirement<?, ?>> additionalRequirements, Map<Class<?>, List<EventHandler<RecipeEvent>>> eventHandlers, List<String> recipeTooltips) {
         List<MeltingRecipe> meltingRecipes = TinkerRegistry.getAllMeltingRecipies();
         List<MachineRecipe> machineRecipeList = new ArrayList<>(meltingRecipes.size());
 
@@ -44,7 +44,7 @@ public class AdapterSmelteryMeltingRecipe extends RecipeAdapter {
                     modifiers, RequirementTypesMM.REQUIREMENT_DURATION, IOType.INPUT, (float) meltingRecipe.temperature / 10, false)), 1),
                 incId, false
             );
-            recipe.addRecipeEventHandler(RecipeCheckEvent.class, (IEventHandler<RecipeCheckEvent>) event -> {
+            recipe.addRecipeEventHandler(RecipeCheckEvent.class, (EventHandler<RecipeCheckEvent>) event -> {
                 if (event.phase == Phase.START) {
                     event.getActiveRecipe().getDataCompound().setFloat("temperatureRequired", meltingRecipe.temperature);
                 }

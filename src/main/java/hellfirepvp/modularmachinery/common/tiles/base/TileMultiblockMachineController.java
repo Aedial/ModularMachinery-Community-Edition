@@ -937,24 +937,29 @@ public abstract class TileMultiblockMachineController extends TileEntityRestrict
         }
     }
 
+    @Method(modid = "crafttweaker")
     public IWorld getIWorld() {
         return CraftTweakerMC.getIWorld(getWorld());
     }
 
+    @Method(modid = "crafttweaker")
     public crafttweaker.api.block.IBlockState getIBlockState() {
         return CraftTweakerMC.getBlockState(getWorld().getBlockState(getPos()));
     }
 
     @Override
+    @Method(modid = "crafttweaker")
     public IFacing getFacing() {
         return CraftTweakerMC.getIFacing(controllerRotation);
     }
 
+    @Method(modid = "crafttweaker")
     public IBlockPos getIPos() {
         return CraftTweakerMC.getIBlockPos(getPos());
     }
 
     @Override
+    @Method(modid = "crafttweaker")
     public IBlockPos rotateWithControllerFacing(final IBlockPos posCT) {
         BlockPos pos = CraftTweakerMC.getBlockPos(posCT);
         return CraftTweakerMC.getIBlockPos(MiscUtils.rotateYCCWNorthUntil(pos, controllerRotation == null ? EnumFacing.NORTH : controllerRotation));
@@ -964,10 +969,12 @@ public abstract class TileMultiblockMachineController extends TileEntityRestrict
         return isStructureFormed() ? foundMachine.getRegistryName().toString() : null;
     }
 
+    @Method(modid = "crafttweaker")
     public IData getCustomData() {
         return CraftTweakerMC.getIDataModifyable(customData);
     }
 
+    @Method(modid = "crafttweaker")
     public void setCustomData(IData data) {
         customData = CraftTweakerMC.getNBTCompound(data);
         markNoUpdateSync();
@@ -1179,6 +1186,7 @@ public abstract class TileMultiblockMachineController extends TileEntityRestrict
     }
 
     @Override
+    @Method(modid = "crafttweaker")
     public int getBlocksInPattern(final IItemStack blockStack) {
         if (foundPattern == null || blockStack == null) {
             return 0;
@@ -1192,6 +1200,7 @@ public abstract class TileMultiblockMachineController extends TileEntityRestrict
     }
 
     @Override
+    @Method(modid = "crafttweaker")
     public int getBlocksInPattern(final IBlockStateMatcher blockStateMatcher) {
         if (foundPattern == null) {
             return 0;
@@ -1209,6 +1218,7 @@ public abstract class TileMultiblockMachineController extends TileEntityRestrict
     }
 
     @Override
+    @Method(modid = "crafttweaker")
     public int getBlocksInPattern(final IBlockStatePredicate predicate) {
         if (foundPattern == null) {
             return 0;
@@ -1217,6 +1227,7 @@ public abstract class TileMultiblockMachineController extends TileEntityRestrict
     }
 
     @Override
+    @Method(modid = "crafttweaker")
     public IBlockPos[] getBlockPosInPattern(IItemStack blockStack) {
         if (foundPattern == null || blockStack == null) {
             return new IBlockPos[0];
@@ -1230,6 +1241,7 @@ public abstract class TileMultiblockMachineController extends TileEntityRestrict
     }
 
     @Override
+    @Method(modid = "crafttweaker")
     public IBlockPos[] getBlockPosInPattern(IBlockStateMatcher blockStateMatcher) {
         if (foundPattern == null) {
             return new IBlockPos[0];
@@ -1238,6 +1250,7 @@ public abstract class TileMultiblockMachineController extends TileEntityRestrict
     }
 
     @Override
+    @Method(modid = "crafttweaker")
     public IBlockPos[] getBlockPosInPattern(String blockName) {
         if (foundPattern == null) {
             return new IBlockPos[0];
@@ -1247,6 +1260,7 @@ public abstract class TileMultiblockMachineController extends TileEntityRestrict
     }
 
     @Override
+    @Method(modid = "crafttweaker")
     public IBlockPos[] getBlockPosInPattern(IBlockStatePredicate predicate) {
         if (foundPattern == null) {
             return new IBlockPos[0];
@@ -1272,6 +1286,7 @@ public abstract class TileMultiblockMachineController extends TileEntityRestrict
         return count;
     }
 
+    @Method(modid = "crafttweaker")
     public IBlockPos[] getBlockPossInPatternInternal(final Predicate<IBlockState> predicate) {
         if (foundPattern == null) {
             return new IBlockPos[0];
@@ -1292,6 +1307,7 @@ public abstract class TileMultiblockMachineController extends TileEntityRestrict
 
     @Nullable
     @Override
+    @Method(modid = "crafttweaker")
     @SuppressWarnings("ConstantValue")
     public IPlayer getOwnerIPlayer() {
         if (owner == null) {

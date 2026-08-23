@@ -1,6 +1,6 @@
 package hellfirepvp.modularmachinery.common.crafting.adapter.nco;
 
-import crafttweaker.util.IEventHandler;
+import github.kasuminova.mmce.common.event.EventHandler;
 import github.kasuminova.mmce.common.event.recipe.RecipeEvent;
 import github.kasuminova.mmce.common.itemtype.ChancedIngredientStack;
 import hellfirepvp.modularmachinery.common.crafting.MachineRecipe;
@@ -39,7 +39,7 @@ public class AdapterNCOAlloyFurnace extends AdapterNCOMachine {
     public Collection<MachineRecipe> createRecipesFor(ResourceLocation owningMachineName,
                                                       List<RecipeModifier> modifiers,
                                                       List<ComponentRequirement<?, ?>> additionalRequirements,
-                                                      Map<Class<?>, List<IEventHandler<RecipeEvent>>> eventHandlers,
+                                                      Map<Class<?>, List<EventHandler<RecipeEvent>>> eventHandlers,
                                                       List<String> recipeTooltips) {
         List<BasicRecipe> recipeList = NCRecipes.alloy_furnace.getRecipeList();
         List<MachineRecipe> machineRecipeList = new ArrayList<>(recipeList.size());

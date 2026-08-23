@@ -8,7 +8,7 @@
 
 package hellfirepvp.modularmachinery.common.crafting.adapter;
 
-import crafttweaker.util.IEventHandler;
+import github.kasuminova.mmce.common.event.EventHandler;
 import github.kasuminova.mmce.common.event.recipe.RecipeEvent;
 import hellfirepvp.modularmachinery.common.crafting.MachineRecipe;
 import hellfirepvp.modularmachinery.common.crafting.helper.ComponentRequirement;
@@ -41,7 +41,7 @@ public abstract class RecipeAdapter implements IForgeRegistryEntry<RecipeAdapter
     @Deprecated
     public static void addAdditionalRequirements(MachineRecipe recipe,
                                                  List<ComponentRequirement<?, ?>> additionalRequirements,
-                                                 Map<Class<?>, List<IEventHandler<RecipeEvent>>> eventHandlers,
+                                                 Map<Class<?>, List<EventHandler<RecipeEvent>>> eventHandlers,
                                                  List<String> recipeTooltips) {
     }
 
@@ -65,7 +65,7 @@ public abstract class RecipeAdapter implements IForgeRegistryEntry<RecipeAdapter
     public abstract Collection<MachineRecipe> createRecipesFor(ResourceLocation owningMachineName,
                                                                List<RecipeModifier> modifiers,
                                                                List<ComponentRequirement<?, ?>> additionalRequirements,
-                                                               Map<Class<?>, List<IEventHandler<RecipeEvent>>> eventHandlers,
+                                                               Map<Class<?>, List<EventHandler<RecipeEvent>>> eventHandlers,
                                                                List<String> recipeTooltips);
 
     @Nonnull

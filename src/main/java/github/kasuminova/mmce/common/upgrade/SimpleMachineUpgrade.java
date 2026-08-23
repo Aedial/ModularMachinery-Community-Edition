@@ -3,9 +3,9 @@ package github.kasuminova.mmce.common.upgrade;
 import crafttweaker.annotations.ZenRegister;
 import crafttweaker.api.data.IData;
 import crafttweaker.api.minecraft.CraftTweakerMC;
-import hellfirepvp.modularmachinery.common.integration.crafttweaker.helper.IFunction;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.fml.common.Optional;
 import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenGetter;
 import stanhebben.zenscript.annotations.ZenSetter;
@@ -14,13 +14,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 @ZenRegister
 @ZenClass("mods.modularmachinery.SimpleMachineUpgrade")
 public class SimpleMachineUpgrade extends MachineUpgrade {
-    private final List<String>                              descriptions             = new ArrayList<>();
-    private       IFunction<SimpleMachineUpgrade, String[]> busGuiDescriptionHandler = null;
-    private       NBTTagCompound                            customData               = new NBTTagCompound();
+    private final List<String>                             descriptions             = new ArrayList<>();
+    private       Function<SimpleMachineUpgrade, String[]> busGuiDescriptionHandler = null;
+    private       NBTTagCompound                           customData               = new NBTTagCompound();
 
     public SimpleMachineUpgrade(final UpgradeType type) {
         super(type);
@@ -39,7 +40,7 @@ public class SimpleMachineUpgrade extends MachineUpgrade {
         descriptions.add(desc);
     }
 
-    public void setBusGUIDescriptionHandler(final IFunction<SimpleMachineUpgrade, String[]> handler) {
+    public void setBusGUIDescriptionHandler(final Function<SimpleMachineUpgrade, String[]> handler) {
         this.busGuiDescriptionHandler = handler;
     }
 
@@ -51,6 +52,7 @@ public class SimpleMachineUpgrade extends MachineUpgrade {
      * @return IData，永不为空。
      */
     @ZenGetter("customData")
+    @Optional.Method(modid = "crafttweaker")
     public IData getCustomData() {
         return CraftTweakerMC.getIDataModifyable(customData);
     }
@@ -63,6 +65,7 @@ public class SimpleMachineUpgrade extends MachineUpgrade {
      * @param customData IData，不能为空。
      */
     @ZenSetter("customData")
+    @Optional.Method(modid = "crafttweaker")
     public void setCustomData(final IData customData) {
         this.customData = CraftTweakerMC.getNBTCompound(customData);
     }

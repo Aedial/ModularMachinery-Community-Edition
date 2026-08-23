@@ -16,7 +16,7 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import crafttweaker.util.IEventHandler;
+import github.kasuminova.mmce.common.event.EventHandler;
 import github.kasuminova.mmce.common.event.recipe.RecipeEvent;
 import hellfirepvp.modularmachinery.ModularMachinery;
 import hellfirepvp.modularmachinery.common.crafting.command.RecipeCommandContainer;
@@ -26,7 +26,7 @@ import hellfirepvp.modularmachinery.common.crafting.helper.ComponentSelectorTag;
 import hellfirepvp.modularmachinery.common.crafting.requirement.RequirementEnergy;
 import hellfirepvp.modularmachinery.common.crafting.requirement.type.RequirementType;
 import hellfirepvp.modularmachinery.common.data.Config;
-import hellfirepvp.modularmachinery.common.integration.crafttweaker.RecipeAdapterBuilder;
+import hellfirepvp.modularmachinery.common.crafting.adapter.RecipeAdapterDefinition;
 import hellfirepvp.modularmachinery.common.lib.RegistriesMM;
 import hellfirepvp.modularmachinery.common.lib.RequirementTypesMM;
 import hellfirepvp.modularmachinery.common.machine.DynamicMachine;
@@ -61,16 +61,16 @@ public class MachineRecipe implements Comparable<MachineRecipe> {
 
     protected static int counter = 0;
 
-    protected final int              sortId;
-    protected final String           recipeFilePath;
-    protected final ResourceLocation owningMachine, registryName;
-    protected final int                                             tickTime;
-    protected final List<ComponentRequirement<?, ?>>                recipeRequirements = Lists.newArrayList();
-    protected final RecipeCommandContainer                          commandContainer   = new RecipeCommandContainer();
-    protected final int                                             configuredPriority;
-    protected final boolean                                         voidPerTickFailure;
-    protected final Map<Class<?>, List<IEventHandler<RecipeEvent>>> recipeEventHandlers;
-    protected final List<String>                                    tooltipList;
+    protected final int                                            sortId;
+    protected final String                                         recipeFilePath;
+    protected final ResourceLocation                               owningMachine, registryName;
+    protected final int                                            tickTime;
+    protected final List<ComponentRequirement<?, ?>>               recipeRequirements = Lists.newArrayList();
+    protected final RecipeCommandContainer                         commandContainer   = new RecipeCommandContainer();
+    protected final int                                            configuredPriority;
+    protected final boolean                                        voidPerTickFailure;
+    protected final Map<Class<?>, List<EventHandler<RecipeEvent>>> recipeEventHandlers;
+    protected final List<String>                                   tooltipList;
 
     protected boolean parallelized;
     protected String  threadName;
@@ -97,7 +97,7 @@ public class MachineRecipe implements Comparable<MachineRecipe> {
 
     public MachineRecipe(String path, ResourceLocation registryName, ResourceLocation owningMachine,
                          int tickTime, int configuredPriority, boolean voidPerTickFailure, boolean parallelized,
-                         Map<Class<?>, List<IEventHandler<RecipeEvent>>> recipeEventHandlers, List<String> tooltipList,
+                         Map<Class<?>, List<EventHandler<RecipeEvent>>> recipeEventHandlers, List<String> tooltipList,
                          String threadName, int maxThreads, boolean loadJEI) {
         this.sortId = counter;
         counter++;
@@ -132,7 +132,7 @@ public class MachineRecipe implements Comparable<MachineRecipe> {
         this.loadJEI = preparedRecipe.getLoadJEI();
     }
 
-    public void mergeAdapter(final RecipeAdapterBuilder adapterBuilder) {
+    public void mergeAdapter(final RecipeAdapterDefinition adapterBuilder) {
         this.parallelized = adapterBuilder.isParallelized();
         this.tooltipList.addAll(adapterBuilder.getTooltipList());
         this.loadJEI = adapterBuilder.getLoadJEI();
@@ -163,9 +163,9 @@ public class MachineRecipe implements Comparable<MachineRecipe> {
                           .collect(Collectors.toList());
     }
 
-    public <H extends RecipeEvent> void addRecipeEventHandler(Class<?> hClass, IEventHandler<H> handler) {
+    public <H extends RecipeEvent> void addRecipeEventHandler(Class<?> hClass, EventHandler<H> handler) {
         recipeEventHandlers.putIfAbsent(hClass, new ArrayList<>());
-        recipeEventHandlers.get(hClass).add((IEventHandler<RecipeEvent>) handler);
+        recipeEventHandlers.get(hClass).add((EventHandler<RecipeEvent>) handler);
     }
 
     public boolean isParallelized() {
@@ -173,11 +173,11 @@ public class MachineRecipe implements Comparable<MachineRecipe> {
     }
 
     @Nullable
-    public List<IEventHandler<RecipeEvent>> getRecipeEventHandlers(Class<?> handlerClass) {
+    public List<EventHandler<RecipeEvent>> getRecipeEventHandlers(Class<?> handlerClass) {
         return recipeEventHandlers.get(handlerClass);
     }
 
-    public Map<Class<?>, List<IEventHandler<RecipeEvent>>> getRecipeEventHandlers() {
+    public Map<Class<?>, List<EventHandler<RecipeEvent>>> getRecipeEventHandlers() {
         return recipeEventHandlers;
     }
 

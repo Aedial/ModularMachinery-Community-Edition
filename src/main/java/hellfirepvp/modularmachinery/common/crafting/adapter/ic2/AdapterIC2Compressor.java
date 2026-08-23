@@ -1,6 +1,6 @@
 package hellfirepvp.modularmachinery.common.crafting.adapter.ic2;
 
-import crafttweaker.util.IEventHandler;
+import github.kasuminova.mmce.common.event.EventHandler;
 import github.kasuminova.mmce.common.event.recipe.RecipeEvent;
 import hellfirepvp.modularmachinery.common.crafting.MachineRecipe;
 import hellfirepvp.modularmachinery.common.crafting.helper.ComponentRequirement;
@@ -28,7 +28,7 @@ public class AdapterIC2Compressor extends AdapterIC2Machine {
     public Collection<MachineRecipe> createRecipesFor(ResourceLocation owningMachineName,
                                                       List<RecipeModifier> modifiers,
                                                       List<ComponentRequirement<?, ?>> additionalRequirements,
-                                                      Map<Class<?>, List<IEventHandler<RecipeEvent>>> eventHandlers,
+                                                      Map<Class<?>, List<EventHandler<RecipeEvent>>> eventHandlers,
                                                       List<String> recipeTooltips) {
         Iterable<? extends ic2.api.recipe.MachineRecipe<IRecipeInput, Collection<ItemStack>>> machineRecipes = Recipes.compressor.getRecipes();
 

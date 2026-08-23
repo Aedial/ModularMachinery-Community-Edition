@@ -14,7 +14,7 @@ import hellfirepvp.modularmachinery.ModularMachinery;
 import hellfirepvp.modularmachinery.common.CommonProxy;
 import hellfirepvp.modularmachinery.common.crafting.adapter.RecipeAdapterAccessor;
 import hellfirepvp.modularmachinery.common.data.DataLoadProfiler;
-import hellfirepvp.modularmachinery.common.integration.crafttweaker.RecipeAdapterBuilder;
+import hellfirepvp.modularmachinery.common.crafting.adapter.RecipeAdapterDefinition;
 import hellfirepvp.modularmachinery.common.machine.DynamicMachine;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.ResourceLocation;
@@ -47,8 +47,8 @@ public class RecipeRegistry {
     private static final Map<ResourceLocation, TreeMap<Integer, TreeSet<MachineRecipe>>> REGISTRY_RECIPE_BY_MACHINE = new HashMap<>();
     private static final Map<ResourceLocation, MachineRecipe>                            RECIPE_REGISTRY            = new HashMap<>();
 
-    private final List<PreparedRecipe>       earlyRecipes        = new LinkedList<>();
-    private final List<RecipeAdapterBuilder> earlyRecipeAdapters = new LinkedList<>();
+    private final List<PreparedRecipe>          earlyRecipes        = new LinkedList<>();
+    private final List<RecipeAdapterDefinition> earlyRecipeAdapters = new LinkedList<>();
 
     private RecipeRegistry() {
     }
@@ -73,7 +73,7 @@ public class RecipeRegistry {
 
     private static Map<DynamicMachine, List<MachineRecipe>> loadAdapters(@Nullable ICommandSender sender,
                                                                          Map<ResourceLocation, MachineRecipe> sharedLoadRegistry,
-                                                                         List<RecipeAdapterBuilder> earlyRecipeAdapters) {
+                                                                         List<RecipeAdapterDefinition> earlyRecipeAdapters) {
         ProgressManager.ProgressBar barRecipes = ProgressManager.push("RecipeRegistry - Adapters", 3);
         barRecipes.step("Discovering Adapter-Files");
         DataLoadProfiler profiler = new DataLoadProfiler();
@@ -241,7 +241,7 @@ public class RecipeRegistry {
         this.earlyRecipes.add(recipe);
     }
 
-    public void registerRecipeAdapterEarly(RecipeAdapterBuilder recipeAdapter) {
+    public void registerRecipeAdapterEarly(RecipeAdapterDefinition recipeAdapter) {
         this.earlyRecipeAdapters.add(recipeAdapter);
     }
 

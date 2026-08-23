@@ -4,9 +4,9 @@ import crafttweaker.annotations.ZenRegister;
 import crafttweaker.api.data.IData;
 import crafttweaker.api.item.IItemStack;
 import crafttweaker.api.minecraft.CraftTweakerMC;
-import hellfirepvp.modularmachinery.common.integration.crafttweaker.helper.IFunction;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.fml.common.Optional;
 import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenGetter;
 import stanhebben.zenscript.annotations.ZenMethod;
@@ -15,12 +15,13 @@ import stanhebben.zenscript.annotations.ZenSetter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 @ZenRegister
 @ZenClass("mods.modularmachinery.SimpleDynamicMachineUpgrade")
 public class SimpleDynamicMachineUpgrade extends DynamicMachineUpgrade {
-    private IFunction<SimpleDynamicMachineUpgrade, String[]> descriptionHandler       = null;
-    private IFunction<SimpleDynamicMachineUpgrade, String[]> busGuiDescriptionHandler = null;
+    private Function<SimpleDynamicMachineUpgrade, String[]> descriptionHandler       = null;
+    private Function<SimpleDynamicMachineUpgrade, String[]> busGuiDescriptionHandler = null;
 
     private NBTTagCompound itemData   = new NBTTagCompound();
     private NBTTagCompound customData = new NBTTagCompound();
@@ -37,6 +38,7 @@ public class SimpleDynamicMachineUpgrade extends DynamicMachineUpgrade {
      * @return IData，永不为空。
      */
     @ZenGetter("itemData")
+    @Optional.Method(modid = "crafttweaker")
     public IData getItemData() {
         return CraftTweakerMC.getIDataModifyable(itemData);
     }
@@ -49,6 +51,7 @@ public class SimpleDynamicMachineUpgrade extends DynamicMachineUpgrade {
      * @param itemData IData，不能为空。
      */
     @ZenSetter("itemData")
+    @Optional.Method(modid = "crafttweaker")
     public void setItemData(final IData itemData) {
         this.itemData = CraftTweakerMC.getNBTCompound(itemData);
     }
@@ -61,6 +64,7 @@ public class SimpleDynamicMachineUpgrade extends DynamicMachineUpgrade {
      * @return IData，永不为空。
      */
     @ZenGetter("customData")
+    @Optional.Method(modid = "crafttweaker")
     public IData getCustomData() {
         return CraftTweakerMC.getIDataModifyable(customData);
     }
@@ -73,11 +77,13 @@ public class SimpleDynamicMachineUpgrade extends DynamicMachineUpgrade {
      * @param customData IData，不能为空。
      */
     @ZenSetter("customData")
+    @Optional.Method(modid = "crafttweaker")
     public void setCustomData(final IData customData) {
         this.customData = CraftTweakerMC.getNBTCompound(customData);
     }
 
     @ZenGetter("parentStack")
+    @Optional.Method(modid = "crafttweaker")
     public IItemStack getParentStackCT() {
         return CraftTweakerMC.getIItemStack(parentStack);
     }
@@ -98,11 +104,11 @@ public class SimpleDynamicMachineUpgrade extends DynamicMachineUpgrade {
         }
     }
 
-    public void setDescriptionHandler(final IFunction<SimpleDynamicMachineUpgrade, String[]> handler) {
+    public void setDescriptionHandler(final Function<SimpleDynamicMachineUpgrade, String[]> handler) {
         this.descriptionHandler = handler;
     }
 
-    public void setBusGUIDescriptionHandler(final IFunction<SimpleDynamicMachineUpgrade, String[]> handler) {
+    public void setBusGUIDescriptionHandler(final Function<SimpleDynamicMachineUpgrade, String[]> handler) {
         this.busGuiDescriptionHandler = handler;
     }
 

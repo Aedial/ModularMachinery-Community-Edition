@@ -16,6 +16,7 @@ import hellfirepvp.modularmachinery.common.machine.RecipeThread;
 import hellfirepvp.modularmachinery.common.modifier.RecipeModifier;
 import hellfirepvp.modularmachinery.common.tiles.base.TileMultiblockMachineController;
 import hellfirepvp.modularmachinery.common.util.SmartInterfaceData;
+import net.minecraftforge.fml.common.Optional;
 import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenGetter;
 import stanhebben.zenscript.annotations.ZenMethod;
@@ -33,6 +34,7 @@ public interface IMachineController {
      * @return 世界
      */
     @ZenGetter("world")
+    @Optional.Method(modid = "crafttweaker")
     IWorld getIWorld();
 
     /**
@@ -41,6 +43,7 @@ public interface IMachineController {
      * @return IBlockState
      */
     @ZenGetter("blockState")
+    @Optional.Method(modid = "crafttweaker")
     IBlockState getIBlockState();
 
     /**
@@ -49,6 +52,7 @@ public interface IMachineController {
      * @return IFacing
      */
     @ZenGetter("facing")
+    @Optional.Method(modid = "crafttweaker")
     IFacing getFacing();
 
     /**
@@ -57,6 +61,7 @@ public interface IMachineController {
      * @return 坐标
      */
     @ZenGetter("pos")
+    @Optional.Method(modid = "crafttweaker")
     IBlockPos getIPos();
 
     /**
@@ -66,6 +71,7 @@ public interface IMachineController {
      * @return 旋转后的坐标
      */
     @ZenMethod
+    @Optional.Method(modid = "crafttweaker")
     IBlockPos rotateWithControllerFacing(final IBlockPos pos);
 
     /**
@@ -138,6 +144,7 @@ public interface IMachineController {
      * @return IData
      */
     @ZenGetter("customData")
+    @Optional.Method(modid = "crafttweaker")
     IData getCustomData();
 
     /**
@@ -146,6 +153,7 @@ public interface IMachineController {
      * @param data IData
      */
     @ZenSetter("customData")
+    @Optional.Method(modid = "crafttweaker")
     void setCustomData(IData data);
 
     /**
@@ -273,6 +281,7 @@ public interface IMachineController {
      * @return 存在数量。
      */
     @ZenMethod
+    @Optional.Method(modid = "crafttweaker")
     int getBlocksInPattern(final IItemStack blockStack);
 
     /**
@@ -284,6 +293,7 @@ public interface IMachineController {
      * @return 存在数量。
      */
     @ZenMethod
+    @Optional.Method(modid = "crafttweaker")
     int getBlocksInPattern(final IBlockStateMatcher blockStateMatcher);
 
     /**
@@ -306,6 +316,7 @@ public interface IMachineController {
      * @return 存在数量。
      */
     @ZenMethod
+    @Optional.Method(modid = "crafttweaker")
     int getBlocksInPattern(final IBlockStatePredicate predicate);
 
     /**
@@ -317,6 +328,7 @@ public interface IMachineController {
      * @return 所有位置。
      */
     @ZenMethod
+    @Optional.Method(modid = "crafttweaker")
     IBlockPos[] getBlockPosInPattern(final IItemStack blockStack);
 
     /**
@@ -328,6 +340,7 @@ public interface IMachineController {
      * @return 所有位置。
      */
     @ZenMethod
+    @Optional.Method(modid = "crafttweaker")
     IBlockPos[] getBlockPosInPattern(final IBlockStateMatcher blockStateMatcher);
 
     /**
@@ -339,6 +352,7 @@ public interface IMachineController {
      * @return 所有位置。
      */
     @ZenMethod
+    @Optional.Method(modid = "crafttweaker")
     IBlockPos[] getBlockPosInPattern(final String blockName);
 
     /**
@@ -350,6 +364,7 @@ public interface IMachineController {
      * @return 所有位置。
      */
     @ZenMethod
+    @Optional.Method(modid = "crafttweaker")
     IBlockPos[] getBlockPosInPattern(final IBlockStatePredicate predicate);
 
     /**
@@ -359,6 +374,7 @@ public interface IMachineController {
      */
     @Nullable
     @ZenGetter("ownerPlayer")
+    @Optional.Method(modid = "crafttweaker")
     IPlayer getOwnerIPlayer();
 
     /**

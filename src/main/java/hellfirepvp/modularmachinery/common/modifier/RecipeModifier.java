@@ -19,7 +19,6 @@ import hellfirepvp.modularmachinery.common.crafting.IntegrationTypeHelper;
 import hellfirepvp.modularmachinery.common.crafting.helper.ComponentRequirement;
 import hellfirepvp.modularmachinery.common.crafting.helper.RecipeCraftingContext;
 import hellfirepvp.modularmachinery.common.crafting.requirement.type.RequirementType;
-import hellfirepvp.modularmachinery.common.integration.crafttweaker.RecipeModifierBuilder;
 import hellfirepvp.modularmachinery.common.lib.RegistriesMM;
 import hellfirepvp.modularmachinery.common.machine.IOType;
 import net.minecraft.nbt.NBTTagCompound;
@@ -84,13 +83,19 @@ public class RecipeModifier {
 
     public static RecipeModifier deserialize(NBTTagCompound compound) {
         if (compound.hasKey("target") && compound.hasKey("ioTarget") && compound.hasKey("operation") && compound.hasKey("value") && compound.hasKey("chance")) {
-            return RecipeModifierBuilder.newBuilder()
-                                        .setRequirementType(compound.getString("target"))
-                                        .setIOType(compound.getByte("ioTarget") == 0 ? IO_INPUT : IO_OUTPUT)
-                                        .setOperation(compound.getByte("operation"))
-                                        .setValue(compound.getFloat("value"))
-                                        .isAffectChance(compound.getBoolean("chance"))
-                                        .build();
+            String targetName = compound.getString("target");
+            int operation = compound.getByte("operation");
+            if (targetName.isEmpty() || operation < OPERATION_ADD || operation > OPERATION_MULTIPLY) {
+                return null;
+            }
+
+            RequirementType<?, ?> target = RegistriesMM.REQUIREMENT_TYPE_REGISTRY.getValue(new ResourceLocation(targetName));
+            if (target == null) {
+                return null;
+            }
+
+            IOType ioType = compound.getByte("ioTarget") == 0 ? IOType.INPUT : IOType.OUTPUT;
+            return new RecipeModifier(target, ioType, compound.getFloat("value"), operation, compound.getBoolean("chance"));
         }
         return null;
     }
